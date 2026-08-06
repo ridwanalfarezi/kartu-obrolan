@@ -25,7 +25,7 @@ describe('conversation session start flow', () => {
     expect(
       screen.getByRole('heading', { name: /mau ngobrol tentang apa/i }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText('Campur')).toBeChecked();
+    expect(screen.getByLabelText(/^Campur/)).toBeChecked();
     expect(screen.getByLabelText(/^Personal/)).toBeChecked();
   });
 
@@ -54,7 +54,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
-    await user.click(screen.getByLabelText('Lucu'));
+    await user.click(screen.getByLabelText(/^Lucu/));
     await user.click(screen.getByLabelText(/^Mendalam/));
     await user.click(
       screen.getByRole('button', { name: /buat pertanyaan/i }),
@@ -119,7 +119,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
-    await user.click(screen.getByLabelText('Lucu'));
+    await user.click(screen.getByLabelText(/^Lucu/));
     await user.click(screen.getByLabelText(/^Mendalam/));
     await user.click(
       screen.getByRole('button', { name: /buat pertanyaan/i }),

@@ -15,12 +15,33 @@ type View = 'home' | 'setup' | 'loading' | 'question' | 'complete' | 'error';
 const categoryOptions: ReadonlyArray<{
   value: Category;
   label: string;
+  description: string;
 }> = [
-  { value: 'light', label: 'Ringan' },
-  { value: 'funny', label: 'Lucu' },
-  { value: 'experience', label: 'Cerita hidup' },
-  { value: 'reflective', label: 'Reflektif' },
-  { value: 'mixed', label: 'Campur' },
+  {
+    value: 'light',
+    label: 'Ringan',
+    description: 'Santai & tidak memeras otak.',
+  },
+  {
+    value: 'funny',
+    label: 'Lucu',
+    description: 'Momen kocak & cerita humor.',
+  },
+  {
+    value: 'experience',
+    label: 'Cerita hidup',
+    description: 'Nostalgia & pengalaman unik.',
+  },
+  {
+    value: 'reflective',
+    label: 'Reflektif',
+    description: 'Perspektif & pandangan diri.',
+  },
+  {
+    value: 'mixed',
+    label: 'Campur',
+    description: 'Kombinasi acak berbagai topik.',
+  },
 ];
 
 const depthOptions: ReadonlyArray<{
@@ -43,6 +64,13 @@ const depthOptions: ReadonlyArray<{
     label: 'Mendalam',
     description: 'Menggali cerita, makna, dan nilai.',
   },
+];
+
+const loadingTips = [
+  'Tip: Tidak ada jawaban yang salah, nikmati obrolannya.',
+  'Tip: Dengarkan dulu sampai selesai sebelum menanggapi.',
+  'Tip: Kamu selalu boleh memilih melewati pertanyaan kapan saja.',
+  'Tip: Pertanyaan dibuat khusus berdasarkan kategori pilihan kelompokmu.',
 ];
 
 function isQuestionPackage(value: unknown): value is QuestionPackage {
@@ -97,9 +125,15 @@ function isQuestionReplacement(
 async function requestQuestionPackage(
   category: Category,
   depth: Depth,
+  signal?: AbortSignal,
 ): Promise<QuestionPackage> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 95_000);
+
+  const onAbort = () => controller.abort();
+  if (signal) {
+    signal.addEventListener('abort', onAbort);
+  }
 
   let response: Response;
   try {
@@ -111,6 +145,9 @@ async function requestQuestionPackage(
     });
   } finally {
     window.clearTimeout(timeout);
+    if (signal) {
+      signal.removeEventListener('abort', onAbort);
+    }
   }
 
   if (!response.ok) {
@@ -201,27 +238,61 @@ export function App() {
   const [regenerateCount, setRegenerateCount] = useState(0);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [regenerationFailed, setRegenerationFailed] = useState(false);
+  const [isConfirmingReset, setIsConfirmingReset] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [tipIndex, setTipIndex] = useState(0);
+
   const headingRef = useRef<HTMLHeadingElement>(null);
   const analyticsRef = useRef<SessionAnalytics | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
 
   useEffect(() => {
     headingRef.current?.focus();
   }, [currentQuestionIndex, questionPackage, view]);
 
+  useEffect(() => {
+    if (view === 'loading') {
+      const interval = window.setInterval(() => {
+        setTipIndex(prev => (prev + 1) % loadingTips.length);
+      }, 4500);
+      return () => window.clearInterval(interval);
+    }
+  }, [view]);
+
   async function startSession() {
     setView('loading');
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
-      const nextPackage = await requestQuestionPackage(category, depth);
+      const nextPackage = await requestQuestionPackage(
+        category,
+        depth,
+        controller.signal,
+      );
       setQuestionPackage(nextPackage);
       setCurrentQuestionIndex(0);
       setSkipCount(0);
       setRegenerateCount(0);
       analyticsRef.current = createSessionAnalytics(category, depth);
       setView('question');
-    } catch {
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === 'AbortError') {
+        return;
+      }
       setView('error');
+    } finally {
+      abortControllerRef.current = null;
     }
+  }
+
+  function cancelLoading() {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+    setView('setup');
   }
 
   function resetSession() {
@@ -231,8 +302,21 @@ export function App() {
     setRegenerateCount(0);
     setIsRegenerating(false);
     setRegenerationFailed(false);
+    setIsConfirmingReset(false);
     analyticsRef.current = null;
     setView('home');
+  }
+
+  async function copyCurrentQuestion() {
+    if (!questionPackage) return;
+    const text = questionPackage.questions[currentQuestionIndex];
+    try {
+      await navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      window.setTimeout(() => setIsCopied(false), 2000);
+    } catch {
+      // Clipboard fallback
+    }
   }
 
   async function regenerateCurrentQuestion() {
@@ -266,6 +350,13 @@ export function App() {
     }
   }
 
+  function previousQuestion() {
+    setRegenerationFailed(false);
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(index => index - 1);
+    }
+  }
+
   function skipQuestion() {
     setRegenerationFailed(false);
     setSkipCount(count => count + 1);
@@ -290,6 +381,25 @@ export function App() {
     }
 
     setCurrentQuestionIndex(index => index + 1);
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    touchStartXRef.current = e.touches[0].clientX;
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (touchStartXRef.current === null) return;
+    const touchEndX = e.changedTouches[0].clientX;
+    const deltaX = touchEndX - touchStartXRef.current;
+    touchStartXRef.current = null;
+
+    if (Math.abs(deltaX) > 50) {
+      if (deltaX < 0 && !isRegenerating) {
+        advanceSession();
+      } else if (deltaX > 0 && currentQuestionIndex > 0 && !isRegenerating) {
+        previousQuestion();
+      }
+    }
   }
 
   const selectedCategory = categoryOptions.find(
@@ -358,7 +468,7 @@ export function App() {
               void startSession();
             }}
           >
-            <fieldset className="choice-group">
+            <fieldset className="choice-group choice-group--category">
               <legend>Pilih kategori</legend>
               <div className="category-options">
                 {categoryOptions.map(option => (
@@ -370,7 +480,10 @@ export function App() {
                       type="radio"
                       value={option.value}
                     />
-                    <span>{option.label}</span>
+                    <span className="category-option__copy">
+                      <strong>{option.label}</strong>
+                      <small>{option.description}</small>
+                    </span>
                   </label>
                 ))}
               </div>
@@ -428,7 +541,17 @@ export function App() {
             <h1 ref={headingRef} tabIndex={-1}>
               Lagi menyiapkan pertanyaan...
             </h1>
-            <p>Free tier kadang memerlukan waktu lebih dari satu menit.</p>
+            <p className="loading-screen__tip">{loadingTips[tipIndex]}</p>
+            <p className="loading-screen__sub">
+              Free tier kadang memerlukan waktu lebih dari satu menit.
+            </p>
+            <button
+              className="text-button text-button--light loading-screen__cancel"
+              onClick={cancelLoading}
+              type="button"
+            >
+              Batal & Ubah Pengaturan
+            </button>
           </div>
         </main>
       )}
@@ -436,31 +559,65 @@ export function App() {
       {view === 'question' && questionPackage && (
         <main className="question-screen screen-enter">
           <header className="question-screen__header">
-            <div>
-              <strong>{currentQuestionIndex + 1} dari 10</strong>
-              <span>
-                {selectedCategory?.label} · {selectedDepth?.label}
-              </span>
+            <div className="question-screen__nav-meta">
+              {currentQuestionIndex > 0 && (
+                <button
+                  aria-label="Pertanyaan sebelumnya"
+                  className="icon-button icon-button--back"
+                  disabled={isRegenerating}
+                  onClick={previousQuestion}
+                  type="button"
+                >
+                  ←
+                </button>
+              )}
+              <div>
+                <strong>{currentQuestionIndex + 1} dari 10</strong>
+                <span>
+                  {selectedCategory?.label} · {selectedDepth?.label}
+                </span>
+              </div>
             </div>
             <ProgressRail currentIndex={currentQuestionIndex} />
           </header>
 
           <section
             aria-busy={isRegenerating}
-            className="question-stage"
+            className={`question-stage ${isRegenerating ? 'is-regenerating' : ''}`}
             aria-label={`Pertanyaan ${currentQuestionIndex + 1} dari 10`}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
           >
             <span aria-hidden="true" className="question-stage__card question-stage__card--one" />
             <span aria-hidden="true" className="question-stage__card question-stage__card--two" />
             <span aria-hidden="true" className="question-stage__ring" />
-            <h1
-              className="question-stage__prompt"
-              key={`${currentQuestionIndex}-${questionPackage.questions[currentQuestionIndex]}`}
-              ref={headingRef}
-              tabIndex={-1}
+
+            {isRegenerating ? (
+              <div className="question-stage__skeleton" aria-live="polite">
+                <span className="skeleton-line" />
+                <span className="skeleton-line skeleton-line--short" />
+                <p>Membuat pertanyaan baru...</p>
+              </div>
+            ) : (
+              <h1
+                className="question-stage__prompt"
+                key={`${currentQuestionIndex}-${questionPackage.questions[currentQuestionIndex]}`}
+                ref={headingRef}
+                tabIndex={-1}
+              >
+                {questionPackage.questions[currentQuestionIndex]}
+              </h1>
+            )}
+
+            <button
+              aria-label="Salin pertanyaan"
+              className="copy-button"
+              disabled={isRegenerating}
+              onClick={() => void copyCurrentQuestion()}
+              type="button"
             >
-              {questionPackage.questions[currentQuestionIndex]}
-            </h1>
+              {isCopied ? '✓ Tersalin' : '📋 Salin'}
+            </button>
           </section>
 
           <footer className="question-screen__footer">
@@ -509,7 +666,7 @@ export function App() {
               <button
                 className="text-button text-button--light"
                 disabled={isRegenerating}
-                onClick={resetSession}
+                onClick={() => setIsConfirmingReset(true)}
                 type="button"
               >
                 Akhiri sesi
@@ -517,6 +674,31 @@ export function App() {
               <p>Pertanyaan siap dibacakan.</p>
             </div>
           </footer>
+
+          {isConfirmingReset && (
+            <div className="confirm-modal-overlay" role="dialog" aria-modal="true">
+              <div className="confirm-modal">
+                <h2>Akhiri sesi obrolan?</h2>
+                <p>Kemajuan 10 pertanyaan pada sesi ini akan dihapus.</p>
+                <div className="confirm-modal__actions">
+                  <button
+                    className="button button--amber button--full"
+                    onClick={resetSession}
+                    type="button"
+                  >
+                    Ya, akhiri sesi
+                  </button>
+                  <button
+                    className="button button--violet button--full"
+                    onClick={() => setIsConfirmingReset(false)}
+                    type="button"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       )}
 
@@ -533,14 +715,24 @@ export function App() {
             </p>
             <p className="complete-screen__privacy">Tidak ada riwayat yang disimpan.</p>
           </div>
-          <button
-            className="button button--amber button--full"
-            onClick={resetSession}
-            type="button"
-          >
-            Mulai sesi baru
-            <span aria-hidden="true">→</span>
-          </button>
+          <div className="complete-screen__actions">
+            <button
+              className="button button--amber button--full"
+              onClick={() => void startSession()}
+              type="button"
+            >
+              Main lagi dengan topik ini
+              <span aria-hidden="true">↻</span>
+            </button>
+            <button
+              className="button button--violet button--full"
+              onClick={resetSession}
+              type="button"
+            >
+              Pilih topik baru
+              <span aria-hidden="true">→</span>
+            </button>
+          </div>
         </main>
       )}
 
@@ -578,3 +770,4 @@ export function App() {
     </div>
   );
 }
+
