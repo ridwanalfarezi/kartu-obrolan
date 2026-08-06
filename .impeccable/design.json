@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-05T17:25:01.0940202+07:00",
+  "title": "Design System: Kartu Obrolan",
+  "extensions": {
+    "colorMeta": {
+      "violet-table": {
+        "role": "primary",
+        "displayName": "Violet Meja",
+        "canonical": "oklch(0.4 0.15 270)",
+        "tonalRamp": ["oklch(0.15 0.06 270)", "oklch(0.25 0.10 270)", "oklch(0.35 0.14 270)", "oklch(0.45 0.15 270)", "oklch(0.58 0.12 270)", "oklch(0.70 0.09 270)", "oklch(0.83 0.05 270)", "oklch(0.95 0.015 270)"]
+      },
+      "conversation-amber": {
+        "role": "secondary",
+        "displayName": "Amber Percakapan",
+        "canonical": "oklch(0.84 0.14 80)",
+        "tonalRamp": ["oklch(0.15 0.04 80)", "oklch(0.27 0.08 80)", "oklch(0.40 0.11 80)", "oklch(0.54 0.14 80)", "oklch(0.68 0.15 80)", "oklch(0.80 0.14 80)", "oklch(0.89 0.09 80)", "oklch(0.96 0.035 80)"]
+      },
+      "violet-mist": {
+        "role": "neutral",
+        "displayName": "Kabut Violet",
+        "canonical": "oklch(0.965 0.008 270)",
+        "tonalRamp": ["oklch(0.15 0.008 270)", "oklch(0.28 0.008 270)", "oklch(0.41 0.008 270)", "oklch(0.55 0.008 270)", "oklch(0.68 0.008 270)", "oklch(0.80 0.008 270)", "oklch(0.90 0.008 270)", "oklch(0.965 0.008 270)"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Tinta",
+        "canonical": "oklch(0.19 0.025 270)",
+        "tonalRamp": ["oklch(0.15 0.025 270)", "oklch(0.25 0.023 270)", "oklch(0.38 0.020 270)", "oklch(0.52 0.017 270)", "oklch(0.65 0.014 270)", "oklch(0.77 0.011 270)", "oklch(0.88 0.007 270)", "oklch(0.96 0.003 270)"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Nama produk pada layar awal." },
+      "question": { "displayName": "Question", "purpose": "Pertanyaan yang dibacakan bersama." },
+      "headline": { "displayName": "Headline", "purpose": "Keputusan utama pada layar pengaturan." },
+      "body": { "displayName": "Body", "purpose": "Penjelasan singkat dan natural." },
+      "label": { "displayName": "Label", "purpose": "Tombol, pilihan, dan status." }
+    },
+    "shadows": [
+      {
+        "name": "desktop-frame",
+        "value": "0 4px 8px color-mix(in oklch, var(--color-ink) 16%, transparent)",
+        "purpose": "Memisahkan bingkai ponsel dari latar desktop mulai 720px."
+      }
+    ],
+    "motion": [
+      { "name": "fast", "value": "180ms", "purpose": "Perubahan state, tombol, dan masuk layar." },
+      { "name": "ease-out-quart", "value": "cubic-bezier(0.25, 1, 0.5, 1)", "purpose": "Easing responsif tanpa bounce." },
+      { "name": "loading-rotation", "value": "1.4s linear infinite", "purpose": "Satu-satunya motion berulang; dinonaktifkan oleh reduced motion." }
+    ],
+    "breakpoints": [
+      { "name": "narrow", "value": "359px" },
+      { "name": "short", "value": "680px height" },
+      { "name": "framed-desktop", "value": "720px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Amber Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Tindakan utama untuk maju satu langkah.",
+      "html": "<button class=\"ds-btn-primary\">Mulai sesi <span aria-hidden=\"true\">→</span></button>",
+      "css": ".ds-btn-primary { width: 100%; min-height: 3.5rem; padding: .875rem 1.25rem; border: 0; border-radius: var(--radius-md, .75rem); display: flex; align-items: center; justify-content: space-between; color: var(--color-ink, oklch(.19 .025 270)); background: var(--color-amber, oklch(.84 .14 80)); font: 700 .875rem/1.2 'Plus Jakarta Sans Variable', sans-serif; transition: background-color 180ms, transform 180ms; } .ds-btn-primary:hover { background: var(--color-amber-active, oklch(.79 .15 75)); transform: translateY(-1px); } .ds-btn-primary:active { transform: translateY(1px); } .ds-btn-primary:focus-visible { outline: 3px solid var(--color-amber, oklch(.84 .14 80)); outline-offset: 3px; }"
+    },
+    {
+      "name": "Secondary Violet Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Tindakan pemulihan pada layar error.",
+      "html": "<button class=\"ds-btn-secondary\">Kembali ke pengaturan</button>",
+      "css": ".ds-btn-secondary { min-height: 3.5rem; padding: .875rem 1.25rem; border: 0; border-radius: .75rem; color: oklch(1 0 0); background: oklch(.4 .15 270); font: 700 .875rem/1.2 'Plus Jakarta Sans Variable', sans-serif; transition: background-color 180ms, transform 180ms; } .ds-btn-secondary:hover { background: oklch(.33 .13 270); transform: translateY(-1px); } .ds-btn-secondary:focus-visible { outline: 3px solid oklch(.84 .14 80); outline-offset: 3px; }"
+    },
+    {
+      "name": "Category Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Pilihan kategori yang ringkas dan mudah dipindai.",
+      "html": "<div class=\"ds-chip-row\"><button class=\"ds-chip\">Ringan</button><button class=\"ds-chip ds-chip--selected\">Campur</button></div>",
+      "css": ".ds-chip-row { display: flex; gap: .75rem; } .ds-chip { min-height: 2.75rem; padding: .625rem 1rem; border: 1px solid oklch(.82 .045 270); border-radius: 999px; color: oklch(.43 .025 270); background: oklch(1 0 0); font: 700 .875rem/1.2 'Plus Jakarta Sans Variable', sans-serif; } .ds-chip:hover { border-color: oklch(.4 .15 270); } .ds-chip:focus-visible { outline: 3px solid oklch(.84 .14 80); outline-offset: 2px; } .ds-chip--selected { border-color: oklch(.4 .15 270); color: oklch(1 0 0); background: oklch(.4 .15 270); }"
+    },
+    {
+      "name": "Depth Choice",
+      "kind": "input",
+      "description": "Pilihan kedalaman dengan label dan deskripsi yang dapat disentuh penuh.",
+      "html": "<label class=\"ds-depth ds-depth--selected\"><span><strong>Personal</strong><small>Lebih dekat dan sedikit lebih jujur.</small></span><i aria-hidden=\"true\"></i></label>",
+      "css": ".ds-depth { min-height: 4.75rem; padding: 1rem; border: 1px solid oklch(.82 .045 270); border-radius: .75rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; color: oklch(.19 .025 270); background: oklch(1 0 0); font-family: 'Plus Jakarta Sans Variable', sans-serif; } .ds-depth span { display: flex; flex-direction: column; gap: .25rem; } .ds-depth strong { font-size: 1rem; } .ds-depth small { color: oklch(.43 .025 270); font-size: .8125rem; } .ds-depth i { width: 1.25rem; height: 1.25rem; border: 2px solid oklch(.4 .15 270); border-radius: 50%; box-shadow: inset 0 0 0 3px oklch(.965 .008 270); background: oklch(.4 .15 270); } .ds-depth--selected { border-color: oklch(.4 .15 270); background: oklch(.965 .008 270); }"
+    },
+    {
+      "name": "Question Stage",
+      "kind": "custom",
+      "description": "Panggung pertanyaan bersama dengan ring amber dan bidang violet.",
+      "html": "<article class=\"ds-question\"><span>1 dari 10</span><h2>Hal spontan terbaik apa yang pernah kamu lakukan?</h2></article>",
+      "css": ".ds-question { min-height: 22rem; padding: 1.5rem; display: grid; align-content: space-between; color: oklch(1 0 0); background: oklch(.33 .13 270); font-family: 'Plus Jakarta Sans Variable', sans-serif; } .ds-question span { color: oklch(.84 .14 80); font-size: .875rem; font-weight: 700; } .ds-question h2 { max-width: 19ch; margin: auto; font-size: 2rem; font-weight: 780; line-height: 1.25; letter-spacing: -.03em; text-align: center; text-wrap: balance; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Meja Tengah",
+    "overview": "Bayangkan satu ponsel diletakkan di tengah meja saat sekelompok teman nongkrong: layar harus langsung terbaca dari beberapa sudut, mengundang satu tindakan utama, lalu menghilang dari perhatian ketika percakapan dimulai. Sistem terasa akrab, spontan, dan berani melalui komposisi yang kontras, bahasa natural, dan target sentuh besar.",
+    "keyCharacteristics": [
+      "Satu keputusan utama yang jelas pada setiap layar.",
+      "Pertanyaan menjadi pusat perhatian tanpa dekorasi yang bersaing.",
+      "Bidang warna tegas, geometri meja melingkar, dan kartu garis tipis.",
+      "Target sentuh minimal 44×44 px serta layout tanpa overflow pada 320–430 px.",
+      "Motion hanya menjelaskan perubahan keadaan dalam 180 ms dan berhenti saat reduced motion aktif."
+    ],
+    "rules": [
+      { "name": "The Committed Color Rule", "body": "Violet membawa 30–60% permukaan pada momen identitas; pada layar utilitarian, ia hanya menandai struktur dan status.", "section": "colors" },
+      { "name": "The Amber Means Go Rule", "body": "Amber hanya untuk tindakan utama, progres aktif, atau fokus keyboard. Jangan menggunakannya sebagai dekorasi.", "section": "colors" },
+      { "name": "The Read-Aloud Rule", "body": "Pertanyaan diukur untuk nyaman dibacakan dari satu meja, bukan untuk memenuhi seluruh kartu.", "section": "typography" },
+      { "name": "The One Voice Rule", "body": "Jangan menambah keluarga font kedua; karakter dibentuk oleh bobot, skala, dan ritme.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Permukaan diam tetap datar. Hierarki utama harus tetap terbaca ketika seluruh bayangan dihapus.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do pusatkan satu pertanyaan atau satu keputusan utama per layar.",
+      "Do pertahankan CTA utama setinggi 3.5rem dan seluruh target interaktif minimal 44×44 px.",
+      "Do uji setiap perubahan pada lebar 320 px, 390 px, dan bingkai desktop 30rem.",
+      "Do gunakan Violet Meja secara committed dan Amber Percakapan hanya untuk maju, progres, atau fokus.",
+      "Do gunakan label sederhana dalam Bahasa Indonesia dan hormati prefers-reduced-motion."
+    ],
+    "donts": [
+      "Don't membuat antarmuka seperti permainan pesta anak-anak dengan warna pelangi, emoji, maskot, poin, confetti, atau dekorasi berlebihan.",
+      "Don't membuatnya terasa seperti perangkat lunak SaaS korporat yang dingin dan formal.",
+      "Don't membuat pengalaman tarot dan mistis gelap yang membuat pertanyaan terasa mengintimidasi.",
+      "Don't memakai gradient text, glassmorphism, radius di atas 1rem, atau border tipis yang dipasangkan dengan bayangan lebar.",
+      "Don't memakai motion dekoratif, entrance sequence, bounce, atau status yang hanya dibedakan lewat warna."
+    ]
+  }
+}

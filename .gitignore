@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+.pnpm-store/
+.scratch/*.log
+.env.local
+.env.*.local
+.vercel/
