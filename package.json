@@ -8,7 +8,7 @@
     "generate:pwa-assets": "pwa-assets-generator",
     "generate:live": "node --env-file=.env.local scripts/generate-live-package.ts",
     "test": "pnpm run test:domain && pnpm run test:ui",
-    "test:domain": "node --test test/question-generator.test.ts test/generate-question-package.test.ts test/analytics.test.ts",
+    "test:domain": "node --import ./test/register.ts --test test/question-generator.test.ts test/generate-question-package.test.ts test/analytics.test.ts",
     "test:ui": "vitest run",
     "typecheck": "tsc --noEmit"
   },
