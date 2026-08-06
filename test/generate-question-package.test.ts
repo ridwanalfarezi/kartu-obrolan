@@ -10,7 +10,11 @@ import {
 test('valid category and depth are accepted by the server boundary', () => {
   assert.deepEqual(
     parseGeneratePackageInput({ category: 'mixed', depth: 'personal' }),
-    { category: 'mixed', depth: 'personal' },
+    { category: 'mixed', depth: 'personal', explorative: true },
+  );
+  assert.deepEqual(
+    parseGeneratePackageInput({ category: 'light', depth: 'casual', explorative: false }),
+    { category: 'light', depth: 'casual', explorative: false },
   );
 });
 
@@ -33,7 +37,7 @@ test('replacement boundary accepts active package context', () => {
       depth: 'deep',
       existingQuestions,
     }),
-    { category: 'funny', depth: 'deep', existingQuestions },
+    { category: 'funny', depth: 'deep', explorative: true, existingQuestions },
   );
 });
 

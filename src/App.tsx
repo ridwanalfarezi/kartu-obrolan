@@ -125,6 +125,7 @@ function isQuestionReplacement(
 async function requestQuestionPackage(
   category: Category,
   depth: Depth,
+  explorative: boolean,
   signal?: AbortSignal,
 ): Promise<QuestionPackage> {
   const controller = new AbortController();
@@ -140,7 +141,7 @@ async function requestQuestionPackage(
     response = await fetch('/api/questions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category, depth }),
+      body: JSON.stringify({ category, depth, explorative }),
       signal: controller.signal,
     });
   } finally {
@@ -165,6 +166,7 @@ async function requestQuestionPackage(
 async function requestQuestionReplacement(
   category: Category,
   depth: Depth,
+  explorative: boolean,
   existingQuestions: string[],
 ): Promise<string> {
   const controller = new AbortController();
@@ -175,7 +177,7 @@ async function requestQuestionReplacement(
     response = await fetch('/api/question-replacement', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category, depth, existingQuestions }),
+      body: JSON.stringify({ category, depth, explorative, existingQuestions }),
       signal: controller.signal,
     });
   } finally {
@@ -231,6 +233,7 @@ export function App() {
   const [view, setView] = useState<View>('home');
   const [category, setCategory] = useState<Category>('mixed');
   const [depth, setDepth] = useState<Depth>('personal');
+  const [explorative, setExplorative] = useState(true);
   const [questionPackage, setQuestionPackage] =
     useState<QuestionPackage | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -269,6 +272,7 @@ export function App() {
       const nextPackage = await requestQuestionPackage(
         category,
         depth,
+        explorative,
         controller.signal,
       );
       setQuestionPackage(nextPackage);
@@ -330,6 +334,7 @@ export function App() {
       const replacement = await requestQuestionReplacement(
         category,
         depth,
+        explorative,
         questionPackage.questions,
       );
       setQuestionPackage(currentPackage => {
@@ -511,13 +516,25 @@ export function App() {
               </div>
             </fieldset>
 
-            <aside className="explorative-note">
-              <strong>Obrolan bisa lebih berani.</strong>
-              <p>
-                Mode eksploratif dapat mengangkat topik dewasa, sensitif, atau
-                kontroversial sesuai kedalaman pilihanmu. Kalian selalu boleh
-                melewati pertanyaan.
-              </p>
+            <aside className="explorative-card">
+              <label className="explorative-toggle">
+                <div className="explorative-toggle__copy">
+                  <strong>Mode Eksploratif</strong>
+                  <p>
+                    Mengangkat topik dewasa, sensitif, atau kontroversial sesuai
+                    kedalaman pilihanmu. Kalian selalu boleh melewati
+                    pertanyaan.
+                  </p>
+                </div>
+                <div className="switch-control">
+                  <input
+                    checked={explorative}
+                    onChange={e => setExplorative(e.target.checked)}
+                    type="checkbox"
+                  />
+                  <span aria-hidden="true" className="switch-control__slider" />
+                </div>
+              </label>
             </aside>
 
             <div className="session-form__action">

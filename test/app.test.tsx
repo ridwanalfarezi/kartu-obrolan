@@ -41,6 +41,36 @@ describe('conversation session start flow', () => {
     expect(screen.getByText(/selalu boleh melewati/i)).toBeInTheDocument();
   });
 
+  test('allows toggling explorative mode off', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ questions }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).toBeChecked();
+    await user.click(checkbox);
+    expect(checkbox).not.toBeChecked();
+
+    await user.click(
+      screen.getByRole('button', { name: /buat pertanyaan/i }),
+    );
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/api/questions',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify({ category: 'mixed', depth: 'personal', explorative: false }),
+        }),
+      );
+    });
+  });
+
   test('requests a validated package and shows its first question', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -71,7 +101,7 @@ describe('conversation session start flow', () => {
         '/api/questions',
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ category: 'funny', depth: 'deep' }),
+          body: JSON.stringify({ category: 'funny', depth: 'deep', explorative: true }),
         }),
       );
     });
@@ -147,7 +177,7 @@ describe('conversation session start flow', () => {
       '/api/questions',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ category: 'funny', depth: 'deep' }),
+        body: JSON.stringify({ category: 'funny', depth: 'deep', explorative: true }),
       }),
     );
   });
@@ -304,6 +334,7 @@ describe('conversation session start flow', () => {
         body: JSON.stringify({
           category: 'mixed',
           depth: 'personal',
+          explorative: true,
           existingQuestions: questions,
         }),
       }),
@@ -359,6 +390,7 @@ describe('conversation session start flow', () => {
         body: JSON.stringify({
           category: 'mixed',
           depth: 'personal',
+          explorative: true,
           existingQuestions: questions,
         }),
       }),

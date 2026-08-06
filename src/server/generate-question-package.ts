@@ -33,6 +33,10 @@ export function parseGeneratePackageInput(
 
   const category = "category" in value ? value.category : undefined;
   const depth = "depth" in value ? value.depth : undefined;
+  const explorative =
+    "explorative" in value && typeof value.explorative === "boolean"
+      ? value.explorative
+      : true;
 
   if (!isCategory(category) || !isDepth(depth)) {
     throw new InvalidGeneratePackageInput(
@@ -40,13 +44,13 @@ export function parseGeneratePackageInput(
     );
   }
 
-  return { category, depth };
+  return { category, depth, explorative };
 }
 
 export function parseGenerateReplacementInput(
   value: unknown,
 ): GenerateReplacementInput {
-  const { category, depth } = parseGeneratePackageInput(value);
+  const { category, depth, explorative } = parseGeneratePackageInput(value);
   const existingQuestions =
     typeof value === "object" && value !== null && "existingQuestions" in value
       ? value.existingQuestions
@@ -77,7 +81,7 @@ export function parseGenerateReplacementInput(
     );
   }
 
-  return { category, depth, existingQuestions: normalizedQuestions };
+  return { category, depth, explorative, existingQuestions: normalizedQuestions };
 }
 
 export async function generateQuestionPackage(

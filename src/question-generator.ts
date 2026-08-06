@@ -25,6 +25,7 @@ export interface QuestionPackage {
 export interface GeneratePackageInput {
   category: Category;
   depth: Depth;
+  explorative?: boolean;
 }
 
 export interface QuestionReplacement {
@@ -149,29 +150,38 @@ function createQuestionReplacementSchema(existingQuestions: string[]) {
   );
 }
 
-function buildPrompt({ category, depth }: GeneratePackageInput): string {
+function buildPrompt({ category, depth, explorative = true }: GeneratePackageInput): string {
+  const explorativeInstruction = explorative
+    ? 'Mode eksploratif aktif: topik dewasa, sensitif, atau kontroversial boleh muncul jika relevan.'
+    : 'Mode eksploratif nonaktif: jaga pertanyaan tetap aman, umum, dan bebas dari topik dewasa, sensitif, atau kontroversial.';
+
   return [
     'Buat tepat 10 pertanyaan kartu obrolan dalam Bahasa Indonesia yang santai dan natural.',
     `Kategori: ${category}.`,
     `Kedalaman: ${depth}.`,
     'Pengguna adalah kelompok 3–8 teman usia 18–35 tahun yang sedang nongkrong.',
     'Pertanyaan harus bervariasi, tidak berulang, dan enak dibacakan dengan suara keras.',
-    'Mode eksploratif aktif: topik dewasa, sensitif, atau kontroversial boleh muncul jika relevan.',
+    explorativeInstruction,
   ].join('\n');
 }
 
 function buildReplacementPrompt({
   category,
   depth,
+  explorative = true,
   existingQuestions,
 }: GenerateReplacementInput): string {
+  const explorativeInstruction = explorative
+    ? 'Mode eksploratif aktif: topik dewasa, sensitif, atau kontroversial boleh muncul jika relevan.'
+    : 'Mode eksploratif nonaktif: jaga pertanyaan tetap aman, umum, dan bebas dari topik dewasa, sensitif, atau kontroversial.';
+
   return [
     'Buat tepat satu pertanyaan pengganti dalam Bahasa Indonesia yang santai dan natural.',
     `Kategori: ${category}.`,
     `Kedalaman: ${depth}.`,
     'Pertanyaan harus enak dibacakan dengan suara keras dan berbeda dari seluruh pertanyaan aktif berikut:',
     ...existingQuestions.map((question, index) => `${index + 1}. ${question}`),
-    'Mode eksploratif aktif: topik dewasa, sensitif, atau kontroversial boleh muncul jika relevan.',
+    explorativeInstruction,
   ].join('\n');
 }
 
