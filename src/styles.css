@@ -724,6 +724,34 @@ button:focus-visible,
   text-wrap: pretty;
 }
 
+.loading-cancel-btn {
+  margin-top: var(--space-xl);
+  min-height: 2.75rem;
+  padding: 0.625rem 1.25rem;
+  border: 1px solid var(--color-violet-muted);
+  border-radius: 999px;
+  color: var(--color-ink);
+  background: var(--color-violet-soft);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  transition: all var(--duration-fast) var(--ease-out-quart);
+}
+
+.loading-cancel-btn:hover {
+  border-color: var(--color-violet);
+  background: var(--color-white);
+  transform: translateY(-1px);
+}
+
+.loading-cancel-btn:active {
+  transform: translateY(1px);
+}
+
 .error-screen {
   background: var(--color-danger-soft);
 }

@@ -559,11 +559,8 @@ export function App() {
               Menyiapkan 10 pertanyaan seru...
             </h1>
             <p className="loading-screen__tip">{loadingTips[tipIndex]}</p>
-            <p className="loading-screen__sub">
-              AI sedang meracik topik obrolan terbaik untuk kelompokmu.
-            </p>
             <button
-              className="text-button text-button--light loading-screen__cancel"
+              className="loading-cancel-btn"
               onClick={cancelLoading}
               type="button"
             >
