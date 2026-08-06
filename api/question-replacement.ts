@@ -4,7 +4,7 @@ import {
   generateQuestionReplacement,
   InvalidGeneratePackageInput,
   parseGenerateReplacementInput,
-} from '../src/server/generate-question-package.ts';
+} from '../src/server/generate-question-package.js';
 
 type ErrorResponse = { error: string };
 

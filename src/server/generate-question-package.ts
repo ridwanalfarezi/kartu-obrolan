@@ -1,4 +1,4 @@
-import { google } from '@ai-sdk/google';
+import { google } from "@ai-sdk/google";
 
 import {
   categories,
@@ -10,31 +10,33 @@ import {
   type GenerateReplacementInput,
   type QuestionPackage,
   type QuestionReplacement,
-} from '../question-generator.ts';
+} from "../question-generator.js";
 
-const model = 'gemini-3.5-flash-lite';
+const model = "gemini-3.5-flash-lite";
 
 function isCategory(value: unknown): value is Category {
-  return categories.some(category => category === value);
+  return categories.some((category) => category === value);
 }
 
 function isDepth(value: unknown): value is Depth {
-  return depths.some(depth => depth === value);
+  return depths.some((depth) => depth === value);
 }
 
 export class InvalidGeneratePackageInput extends Error {}
 
-export function parseGeneratePackageInput(value: unknown): GeneratePackageInput {
-  if (typeof value !== 'object' || value === null) {
-    throw new InvalidGeneratePackageInput('Request body must be an object.');
+export function parseGeneratePackageInput(
+  value: unknown,
+): GeneratePackageInput {
+  if (typeof value !== "object" || value === null) {
+    throw new InvalidGeneratePackageInput("Request body must be an object.");
   }
 
-  const category = 'category' in value ? value.category : undefined;
-  const depth = 'depth' in value ? value.depth : undefined;
+  const category = "category" in value ? value.category : undefined;
+  const depth = "depth" in value ? value.depth : undefined;
 
   if (!isCategory(category) || !isDepth(depth)) {
     throw new InvalidGeneratePackageInput(
-      'Category and depth must use supported values.',
+      "Category and depth must use supported values.",
     );
   }
 
@@ -46,9 +48,7 @@ export function parseGenerateReplacementInput(
 ): GenerateReplacementInput {
   const { category, depth } = parseGeneratePackageInput(value);
   const existingQuestions =
-    typeof value === 'object' &&
-    value !== null &&
-    'existingQuestions' in value
+    typeof value === "object" && value !== null && "existingQuestions" in value
       ? value.existingQuestions
       : undefined;
 
@@ -56,22 +56,24 @@ export function parseGenerateReplacementInput(
     !Array.isArray(existingQuestions) ||
     existingQuestions.length !== 10 ||
     !existingQuestions.every(
-      question => typeof question === 'string' && question.trim().length > 0,
+      (question) => typeof question === "string" && question.trim().length > 0,
     )
   ) {
     throw new InvalidGeneratePackageInput(
-      'Existing questions must contain exactly 10 non-empty strings.',
+      "Existing questions must contain exactly 10 non-empty strings.",
     );
   }
 
-  const normalizedQuestions = existingQuestions.map(question => question.trim());
+  const normalizedQuestions = existingQuestions.map((question) =>
+    question.trim(),
+  );
   const uniqueQuestions = new Set(
-    normalizedQuestions.map(question => question.toLocaleLowerCase('id-ID')),
+    normalizedQuestions.map((question) => question.toLocaleLowerCase("id-ID")),
   );
 
   if (uniqueQuestions.size !== normalizedQuestions.length) {
     throw new InvalidGeneratePackageInput(
-      'Existing questions must not contain duplicates.',
+      "Existing questions must not contain duplicates.",
     );
   }
 
