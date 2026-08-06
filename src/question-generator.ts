@@ -58,7 +58,7 @@ const questionPackageSchema = jsonSchema<QuestionPackage>(
     required: ['questions'],
   },
   {
-    validate(value) {
+      validate(value: unknown) {
       if (
         typeof value !== 'object' ||
         value === null ||
@@ -72,10 +72,11 @@ const questionPackageSchema = jsonSchema<QuestionPackage>(
         };
       }
 
+      const questions = value.questions as string[];
+
       if (
-        !value.questions.every(
-          question =>
-            typeof question === 'string' && question.trim().length > 0,
+        !questions.every(
+          question => typeof question === 'string' && question.trim().length > 0,
         )
       ) {
         return {
@@ -84,7 +85,7 @@ const questionPackageSchema = jsonSchema<QuestionPackage>(
         };
       }
 
-      const normalizedQuestions = value.questions.map(question =>
+      const normalizedQuestions = questions.map(question =>
         question.trim().toLocaleLowerCase('id-ID'),
       );
       if (new Set(normalizedQuestions).size !== normalizedQuestions.length) {
@@ -116,7 +117,7 @@ function createQuestionReplacementSchema(existingQuestions: string[]) {
       required: ['question'],
     },
     {
-      validate(value) {
+      validate(value: unknown) {
         if (
           typeof value !== 'object' ||
           value === null ||
@@ -192,7 +193,7 @@ export function createQuestionGenerator({
         prompt: buildPrompt(input),
       });
 
-      return result.output;
+      return result.output as QuestionPackage;
     },
     async generateReplacement(input) {
       const result = await generateText({
@@ -206,7 +207,7 @@ export function createQuestionGenerator({
         prompt: buildReplacementPrompt(input),
       });
 
-      return result.output;
+      return result.output as QuestionReplacement;
     },
   };
 }
