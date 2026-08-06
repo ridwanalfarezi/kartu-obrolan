@@ -1,5 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 
+import {
+  createSessionAnalytics,
+  type SessionAnalytics,
+} from './analytics.ts';
 import type {
   Category,
   Depth,
@@ -193,9 +197,12 @@ export function App() {
   const [questionPackage, setQuestionPackage] =
     useState<QuestionPackage | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [skipCount, setSkipCount] = useState(0);
+  const [regenerateCount, setRegenerateCount] = useState(0);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [regenerationFailed, setRegenerationFailed] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const analyticsRef = useRef<SessionAnalytics | null>(null);
 
   useEffect(() => {
     headingRef.current?.focus();
@@ -208,6 +215,9 @@ export function App() {
       const nextPackage = await requestQuestionPackage(category, depth);
       setQuestionPackage(nextPackage);
       setCurrentQuestionIndex(0);
+      setSkipCount(0);
+      setRegenerateCount(0);
+      analyticsRef.current = createSessionAnalytics(category, depth);
       setView('question');
     } catch {
       setView('error');
@@ -217,8 +227,11 @@ export function App() {
   function resetSession() {
     setQuestionPackage(null);
     setCurrentQuestionIndex(0);
+    setSkipCount(0);
+    setRegenerateCount(0);
     setIsRegenerating(false);
     setRegenerationFailed(false);
+    analyticsRef.current = null;
     setView('home');
   }
 
@@ -244,6 +257,8 @@ export function App() {
         nextQuestions[currentQuestionIndex] = replacement;
         return { questions: nextQuestions };
       });
+      setRegenerateCount(count => count + 1);
+      analyticsRef.current?.recordRegenerate();
     } catch {
       setRegenerationFailed(true);
     } finally {
@@ -251,10 +266,25 @@ export function App() {
     }
   }
 
+  function skipQuestion() {
+    setRegenerationFailed(false);
+    setSkipCount(count => count + 1);
+    analyticsRef.current?.recordSkip();
+
+    if (isLastQuestion) {
+      analyticsRef.current?.recordComplete();
+      setView('complete');
+      return;
+    }
+
+    setCurrentQuestionIndex(index => index + 1);
+  }
+
   function advanceSession() {
     setRegenerationFailed(false);
 
     if (isLastQuestion) {
+      analyticsRef.current?.recordComplete();
       setView('complete');
       return;
     }
@@ -460,7 +490,7 @@ export function App() {
             <div className="question-screen__secondary-actions">
               <button
                 className="text-button text-button--light"
-                onClick={advanceSession}
+                onClick={skipQuestion}
                 disabled={isRegenerating}
                 type="button"
               >
@@ -497,7 +527,11 @@ export function App() {
             <h1 ref={headingRef} tabIndex={-1}>
               Sesi selesai
             </h1>
-            <p>Semua 10 kartu sudah selesai. Tidak ada riwayat yang disimpan.</p>
+            <p>
+              10 pertanyaan · {skipCount} dilewati
+              {regenerateCount > 0 && ` · ${regenerateCount} dibuat ulang`}
+            </p>
+            <p className="complete-screen__privacy">Tidak ada riwayat yang disimpan.</p>
           </div>
           <button
             className="button button--amber button--full"

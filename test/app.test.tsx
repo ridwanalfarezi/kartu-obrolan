@@ -396,4 +396,43 @@ describe('conversation session start flow', () => {
       screen.getByRole('button', { name: /coba lagi/i }),
     ).toBeInTheDocument();
   });
+
+  test('complete screen shows session summary with skip count', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ questions }),
+      }),
+    );
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await user.click(
+      screen.getByRole('button', { name: /buat pertanyaan/i }),
+    );
+    expect(await screen.findByText(questions[0])).toBeInTheDocument();
+
+    // Skip questions 1 and 2
+    await user.click(screen.getByRole('button', { name: /^lewati$/i }));
+    await user.click(screen.getByRole('button', { name: /^lewati$/i }));
+
+    // Advance through the rest with "Pertanyaan berikutnya"
+    for (let index = 3; index < questions.length; index += 1) {
+      await user.click(
+        screen.getByRole('button', { name: /pertanyaan berikutnya/i }),
+      );
+    }
+    await user.click(
+      screen.getByRole('button', { name: /selesaikan sesi/i }),
+    );
+
+    expect(
+      screen.getByRole('heading', { name: /sesi selesai/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/2 dilewati/i)).toBeInTheDocument();
+    expect(screen.getByText(/tidak ada riwayat yang disimpan/i)).toBeInTheDocument();
+  });
 });
+
