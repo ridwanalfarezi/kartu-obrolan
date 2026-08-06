@@ -576,8 +576,8 @@ export function App() {
       {view === 'question' && questionPackage && (
         <main className="question-screen screen-enter">
           <header className="question-screen__header">
-            <div className="question-screen__nav-meta">
-              {currentQuestionIndex > 0 && (
+            <div className="question-screen__header-top">
+              {currentQuestionIndex > 0 ? (
                 <button
                   aria-label="Pertanyaan sebelumnya"
                   className="icon-button icon-button--back"
@@ -585,15 +585,76 @@ export function App() {
                   onClick={previousQuestion}
                   type="button"
                 >
-                  ←
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <line x1="19" y1="12" x2="5" y2="12" />
+                    <polyline points="12 19 5 12 12 5" />
+                  </svg>
                 </button>
+              ) : (
+                <div className="icon-button-placeholder" aria-hidden="true" />
               )}
-              <div>
-                <strong>{currentQuestionIndex + 1} dari 10</strong>
-                <span>
+
+              <div className="question-screen__meta-pills">
+                <span className="meta-counter">
+                  {currentQuestionIndex + 1} dari 10
+                </span>
+                <span className="meta-dot">•</span>
+                <span className="meta-tags">
                   {selectedCategory?.label} · {selectedDepth?.label}
                 </span>
               </div>
+
+              <button
+                aria-label="Salin pertanyaan"
+                className={`copy-chip ${isCopied ? 'is-copied' : ''}`}
+                disabled={isRegenerating}
+                onClick={() => void copyCurrentQuestion()}
+                type="button"
+              >
+                {isCopied ? (
+                  <>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    <span>Tersalin</span>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                    </svg>
+                    <span>Salin</span>
+                  </>
+                )}
+              </button>
             </div>
             <ProgressRail currentIndex={currentQuestionIndex} />
           </header>
@@ -625,16 +686,6 @@ export function App() {
                 {questionPackage.questions[currentQuestionIndex]}
               </h1>
             )}
-
-            <button
-              aria-label="Salin pertanyaan"
-              className="copy-button"
-              disabled={isRegenerating}
-              onClick={() => void copyCurrentQuestion()}
-              type="button"
-            >
-              {isCopied ? '✓ Tersalin' : '📋 Salin'}
-            </button>
           </section>
 
           <footer className="question-screen__footer">
@@ -663,32 +714,59 @@ export function App() {
             </button>
             <div className="question-screen__secondary-actions">
               <button
-                className="text-button text-button--light"
+                className="action-chip-btn"
                 onClick={skipQuestion}
                 disabled={isRegenerating}
                 type="button"
               >
-                Lewati
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polygon points="5 4 15 12 5 20 5 4" />
+                  <line x1="19" y1="5" x2="19" y2="19" />
+                </svg>
+                <span>Lewati</span>
               </button>
               <button
-                className="text-button text-button--light"
+                className="action-chip-btn"
                 disabled={isRegenerating}
                 onClick={() => void regenerateCurrentQuestion()}
                 type="button"
               >
-                {isRegenerating ? 'Membuat ulang…' : 'Buat ulang'}
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={isRegenerating ? 'spin-icon' : ''}
+                >
+                  <path d="M21.5 2v6h-6M2.5 22v-6h6" />
+                  <path d="M2 11.5a10 10 0 0 1 18.8-4.3L21.5 8M22 12.5a10 10 0 0 1-18.8 4.2L2.5 16" />
+                </svg>
+                <span>{isRegenerating ? 'Membuat ulang…' : 'Buat ulang'}</span>
               </button>
             </div>
             <div className="question-screen__footer-meta">
               <button
-                className="text-button text-button--light"
+                className="end-session-button"
                 disabled={isRegenerating}
                 onClick={() => setIsConfirmingReset(true)}
                 type="button"
               >
                 Akhiri sesi
               </button>
-              <p>Pertanyaan siap dibacakan.</p>
+              <span className="footer-status">Pertanyaan siap dibacakan.</span>
             </div>
           </footer>
 
