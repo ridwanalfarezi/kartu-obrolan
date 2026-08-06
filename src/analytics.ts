@@ -22,7 +22,8 @@ export interface SessionAnalytics {
 
 const STORAGE_PREFIX = 'kartu_obrolan_';
 const SESSION_COUNT_KEY = `${STORAGE_PREFIX}session_count`;
-const ENABLED_KEY = `${STORAGE_PREFIX}analytics_disabled`;
+const SESSION_KEY_PREFIX = `${STORAGE_PREFIX}session_`;
+const MAX_STORED_SESSIONS = 50;
 
 let enabled = true;
 
@@ -60,6 +61,27 @@ function writeSession(sessionId: string, stats: SessionStats): void {
   });
 }
 
+function evictOldSessions(): void {
+  safeWrite(() => {
+    const sessionKeys: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith(SESSION_KEY_PREFIX)) {
+        sessionKeys.push(key);
+      }
+    }
+
+    if (sessionKeys.length <= MAX_STORED_SESSIONS) return;
+
+    // Session keys contain a timestamp prefix, so sorting gives oldest first.
+    sessionKeys.sort();
+    const toRemove = sessionKeys.length - MAX_STORED_SESSIONS;
+    for (let i = 0; i < toRemove; i++) {
+      localStorage.removeItem(sessionKeys[i]);
+    }
+  });
+}
+
 export function setAnalyticsEnabled(value: boolean): void {
   enabled = value;
 }
@@ -92,6 +114,7 @@ export function createSessionAnalytics(
     writeSession(sessionId, stats);
     const count = parseInt(localStorage.getItem(SESSION_COUNT_KEY) ?? '0', 10);
     localStorage.setItem(SESSION_COUNT_KEY, String(count + 1));
+    evictOldSessions();
   });
 
   return {

@@ -11,6 +11,7 @@ Kartu Obrolan adalah aplikasi PWA mobile-first yang membuat pertanyaan percakapa
 - Aksi lewati, buat ulang, lanjut, dan coba lagi saat AI gagal.
 - Disclosure untuk pertanyaan eksploratif yang mungkin membahas topik dewasa, sensitif, atau kontroversial.
 - PWA yang dapat dipasang dengan ikon maskable dan application shell offline.
+- Analytics anonim minimal: jumlah sesi, kategori, kedalaman, dan jumlah pertanyaan yang dilewati atau dibuat ulang. Disimpan di localStorage, tanpa data pribadi.
 - Tidak menyimpan isi percakapan atau riwayat sesi di server.
 
 > Generasi atau pembuatan ulang pertanyaan tetap membutuhkan koneksi internet karena menggunakan Gemini API.
@@ -107,4 +108,4 @@ Detail domain tersedia di [`CONTEXT.md`](./CONTEXT.md), prinsip produk di [`PROD
 
 ## Status
 
-Alur inti pembuatan dan penggunaan paket pertanyaan sudah tersedia. Analytics anonim minimal dan verifikasi release akhir masih tercatat sebagai pekerjaan lanjutan di issue tracker lokal.
+MVP selesai. Alur inti pembuatan dan penggunaan paket pertanyaan, pemulihan kegagalan AI, pengalaman PWA, dan analytics anonim minimal sudah tersedia dan terverifikasi.

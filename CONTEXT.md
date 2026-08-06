@@ -47,3 +47,11 @@ _Avoid_: refresh, retry
 **Retry**:
 An action used when AI generation fails and the app needs to request the intended question package or replacement again.
 _Avoid_: regenerate
+
+## Analytics
+
+**Session analytics**:
+Anonymous, device-local counters recorded in localStorage. Tracks session count, selected category and depth, skip count, and regenerate count. No question text, personal identifiers, or free-form input is ever stored.
+_Avoid_: telemetry, tracking
+
+Analytics can be disabled without changing the core conversation flow.

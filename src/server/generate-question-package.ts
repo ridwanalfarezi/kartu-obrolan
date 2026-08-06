@@ -10,7 +10,7 @@ import {
   type GenerateReplacementInput,
   type QuestionPackage,
   type QuestionReplacement,
-} from "../question-generator.js";
+} from "../question-generator.ts";
 
 const model = "gemini-3.5-flash-lite";
 
