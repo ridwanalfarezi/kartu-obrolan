@@ -91,7 +91,7 @@ describe('conversation session start flow', () => {
     );
 
     expect(
-      screen.getByRole('heading', { name: /lagi menyiapkan pertanyaan/i }),
+      screen.getByRole('heading', { name: /menyiapkan 10 pertanyaan/i }),
     ).toBeInTheDocument();
     expect(await screen.findByText(questions[0])).toBeInTheDocument();
     expect(screen.getByText('1 dari 10')).toBeInTheDocument();
@@ -125,7 +125,7 @@ describe('conversation session start flow', () => {
 
     expect(
       await screen.findByRole('heading', {
-        name: /pertanyaan belum berhasil dibuat/i,
+        name: /gagal menyiapkan pertanyaan/i,
       }),
     ).toBeInTheDocument();
     expect(
@@ -157,7 +157,7 @@ describe('conversation session start flow', () => {
 
     expect(
       await screen.findByRole('heading', {
-        name: /pertanyaan belum berhasil dibuat/i,
+        name: /gagal menyiapkan pertanyaan/i,
       }),
     ).toBeInTheDocument();
     expect(screen.queryByText(questions[0])).not.toBeInTheDocument();
@@ -167,9 +167,6 @@ describe('conversation session start flow', () => {
 
     await user.click(screen.getByRole('button', { name: /coba lagi/i }));
 
-    expect(
-      screen.getByRole('heading', { name: /lagi menyiapkan pertanyaan/i }),
-    ).toBeInTheDocument();
     expect(await screen.findByText(questions[0])).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledTimes(2);
     expect(fetchMock).toHaveBeenNthCalledWith(
@@ -262,7 +259,7 @@ describe('conversation session start flow', () => {
     expect(
       screen.getByRole('heading', { name: /sesi selesai/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/tidak ada riwayat yang disimpan/i)).toBeInTheDocument();
+    expect(screen.getByText(/semua obrolan tetap milik kelompokmu/i)).toBeInTheDocument();
   });
 
   test('skipping the tenth question also finishes the session', async () => {
@@ -370,7 +367,7 @@ describe('conversation session start flow', () => {
     await user.click(screen.getByRole('button', { name: /buat ulang/i }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      /belum berhasil dibuat ulang/i,
+      /gagal membuat ulang/i,
     );
     expect(screen.getByText(questions[0])).toBeInTheDocument();
     expect(screen.getByText('1 dari 10')).toBeInTheDocument();
@@ -421,7 +418,7 @@ describe('conversation session start flow', () => {
     await user.click(screen.getByRole('button', { name: /buat ulang/i }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent(
-      /belum berhasil dibuat ulang/i,
+      /gagal membuat ulang/i,
     );
     expect(screen.getByText(questions[0])).toBeInTheDocument();
     expect(
@@ -464,7 +461,7 @@ describe('conversation session start flow', () => {
       screen.getByRole('heading', { name: /sesi selesai/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/2 dilewati/i)).toBeInTheDocument();
-    expect(screen.getByText(/tidak ada riwayat yang disimpan/i)).toBeInTheDocument();
+    expect(screen.getByText(/semua obrolan tetap milik kelompokmu/i)).toBeInTheDocument();
   });
 });
 

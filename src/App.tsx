@@ -542,7 +542,7 @@ export function App() {
                 Buat pertanyaan
                 <span aria-hidden="true">→</span>
               </button>
-              <p>AI akan membuat 10 pertanyaan. Tidak ada riwayat yang disimpan.</p>
+              <p>10 pertanyaan khusus untuk kelompokmu. 100% privat tanpa simpan riwayat.</p>
             </div>
           </form>
         </main>
@@ -556,18 +556,18 @@ export function App() {
           </div>
           <div className="loading-screen__copy">
             <h1 ref={headingRef} tabIndex={-1}>
-              Lagi menyiapkan pertanyaan...
+              Menyiapkan 10 pertanyaan seru...
             </h1>
             <p className="loading-screen__tip">{loadingTips[tipIndex]}</p>
             <p className="loading-screen__sub">
-              Free tier kadang memerlukan waktu lebih dari satu menit.
+              AI sedang meracik topik obrolan terbaik untuk kelompokmu.
             </p>
             <button
               className="text-button text-button--light loading-screen__cancel"
               onClick={cancelLoading}
               type="button"
             >
-              Batal & Ubah Pengaturan
+              Batal & ubah topik
             </button>
           </div>
         </main>
@@ -692,7 +692,7 @@ export function App() {
             {regenerationFailed && (
               <div className="question-screen__recovery" role="alert">
                 <p>
-                  Belum berhasil dibuat ulang. Pertanyaan saat ini tetap aman.
+                  Gagal membuat ulang. Pertanyaanmu saat ini tetap aman.
                 </p>
                 <button
                   className="text-button text-button--light"
@@ -766,7 +766,7 @@ export function App() {
               >
                 Akhiri sesi
               </button>
-              <span className="footer-status">Pertanyaan siap dibacakan.</span>
+              <span className="footer-status">Giliranmu membaca kartu ini!</span>
             </div>
           </footer>
 
@@ -774,7 +774,7 @@ export function App() {
             <div className="confirm-modal-overlay" role="dialog" aria-modal="true">
               <div className="confirm-modal">
                 <h2>Akhiri sesi obrolan?</h2>
-                <p>Kemajuan 10 pertanyaan pada sesi ini akan dihapus.</p>
+                <p>Progres 10 pertanyaan pada sesi ini akan direset.</p>
                 <div className="confirm-modal__actions">
                   <button
                     className="button button--amber button--full"
@@ -788,7 +788,7 @@ export function App() {
                     onClick={() => setIsConfirmingReset(false)}
                     type="button"
                   >
-                    Batal
+                    Lanjutkan obrolan
                   </button>
                 </div>
               </div>
@@ -802,13 +802,13 @@ export function App() {
           <TableMark compact />
           <div>
             <h1 ref={headingRef} tabIndex={-1}>
-              Sesi selesai
+              Sesi selesai!
             </h1>
             <p>
-              10 pertanyaan · {skipCount} dilewati
+              10 pertanyaan telah dibahas · {skipCount} dilewati
               {regenerateCount > 0 && ` · ${regenerateCount} dibuat ulang`}
             </p>
-            <p className="complete-screen__privacy">Tidak ada riwayat yang disimpan.</p>
+            <p className="complete-screen__privacy">Sesi selesai. Semua obrolan tetap milik kelompokmu.</p>
           </div>
           <div className="complete-screen__actions">
             <button
@@ -836,11 +836,10 @@ export function App() {
           <TableMark compact />
           <div>
             <h1 ref={headingRef} tabIndex={-1}>
-              Pertanyaan belum berhasil dibuat.
+              Gagal menyiapkan pertanyaan.
             </h1>
             <p>
-              AI belum berhasil menyiapkan 10 pertanyaan. Pilihanmu tetap aman
-              di perangkat ini.
+              Koneksi atau AI sedang sibuk. Pilihan topikmu tetap tersimpan aman.
             </p>
           </div>
           <div className="error-screen__actions">
@@ -857,7 +856,7 @@ export function App() {
               onClick={() => setView('setup')}
               type="button"
             >
-              Ubah pengaturan
+              Ubah topik
             </button>
           </div>
         </main>
