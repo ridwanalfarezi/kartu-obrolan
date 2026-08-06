@@ -430,7 +430,7 @@ export function App() {
           </section>
 
           <section className="home-screen__action" aria-label="Mulai sesi baru">
-            <p>3–8 teman · satu ponsel · tanpa akun</p>
+            <p>Satu ponsel · Tanpa daftar · Langsung main</p>
             <button
               className="button button--amber button--full"
               onClick={() => setView('setup')}

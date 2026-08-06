@@ -19,7 +19,7 @@ describe('conversation session start flow', () => {
     const user = userEvent.setup();
     render(<App />);
 
-    expect(screen.getByText(/tanpa akun/i)).toBeInTheDocument();
+    expect(screen.getByText(/tanpa daftar/i)).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
 
     expect(
