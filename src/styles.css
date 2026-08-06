@@ -37,6 +37,7 @@
 
 html {
   background: var(--color-violet-soft);
+  overscroll-behavior-y: none;
 }
 
 body {
@@ -45,6 +46,7 @@ body {
   min-height: 100vh;
   color: var(--color-ink);
   background: var(--color-violet-soft);
+  overscroll-behavior-y: none;
 }
 
 button,
@@ -69,8 +71,13 @@ button:focus-visible,
 .app-frame {
   width: 100%;
   min-height: 100dvh;
-  overflow: hidden;
   background: var(--color-white);
+}
+
+.app-frame--home,
+.app-frame--question,
+.app-frame--complete {
+  background: var(--color-violet-active);
 }
 
 .screen-enter {
