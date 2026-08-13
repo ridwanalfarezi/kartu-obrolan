@@ -6,7 +6,7 @@ Help a group of friends start and sustain a casual conversation by presenting AI
 
 ## Users and context
 
-- Primary users: groups of 3–8 friends, approximately ages 18–35.
+- Primary users: groups of two or more adult friends.
 - Context: spontaneous, casual hangouts.
 - Device pattern: one phone is passed around or viewed by the group.
 

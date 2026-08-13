@@ -4,7 +4,7 @@ Kartu Obrolan adalah aplikasi PWA mobile-first yang membuat pertanyaan percakapa
 
 ## Fitur
 
-- Sesi tanpa akun untuk kelompok 3–8 teman.
+- Sesi tanpa akun untuk dua orang atau lebih pemain.
 - Lima kategori: ringan, lucu, cerita hidup, reflektif, dan campur.
 - Tiga tingkat kedalaman: santai, personal, dan mendalam.
 - Paket berisi tepat 10 pertanyaan berbahasa Indonesia.

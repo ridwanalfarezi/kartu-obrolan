@@ -10,7 +10,7 @@ web
 
 ## Users
 
-Kartu Obrolan digunakan oleh kelompok 3–8 teman, umumnya berusia 18–35 tahun, saat hangout spontan. Satu ponsel dilihat bersama atau berpindah tangan. Mereka ingin memulai dan menjaga percakapan tanpa menyiapkan permainan, membuat akun, atau memasukkan topik sendiri.
+Kartu Obrolan digunakan oleh dua orang atau lebih pemain dewasa saat hangout spontan. Satu ponsel dilihat bersama atau berpindah tangan. Mereka ingin memulai dan menjaga percakapan tanpa menyiapkan permainan, membuat akun, atau memasukkan topik sendiri.
 
 ## Product Purpose
 
@@ -31,7 +31,7 @@ Antarmuka tidak boleh terlihat seperti permainan pesta anak-anak dengan warna pe
 ## Design Principles
 
 - Bawa kelompok menuju pertanyaan pertama secepat mungkin; setiap langkah harus memiliki satu keputusan utama yang jelas.
-- Rancang untuk satu ponsel yang dilihat bersama: teks mudah dipindai, pertanyaan nyaman dibacakan, dan target sentuh mudah dijangkau.
+- Rancang untuk satu ponsel yang dilihat bersama: teks mudah dipindai, pertanyaan berbicara langsung kepada semua pemain, dan target sentuh mudah dijangkau.
 - Berani tanpa memaksa: pertanyaan eksploratif diperbolehkan, sementara `Lewati` dan `Buat ulang` selalu terasa aman dan jelas.
 - Hadirkan kehangatan melalui bahasa, ritme, dan interaksi; bukan melalui dekorasi berlebihan.
 - Setiap perubahan keadaan harus terlihat dan dapat dipulihkan, khususnya saat AI sedang membuat pertanyaan atau gagal.

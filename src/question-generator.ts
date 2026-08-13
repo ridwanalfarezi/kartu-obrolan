@@ -150,7 +150,19 @@ function createQuestionReplacementSchema(existingQuestions: string[]) {
   );
 }
 
-function buildPrompt({ category, depth, explorative = true }: GeneratePackageInput): string {
+const sharedAudienceInstructions = [
+  'Pengguna adalah dua orang atau lebih pemain dewasa yang sedang nongkrong.',
+  'Tulis setiap kartu sebagai pertanyaan langsung kepada seluruh pemain dan dapat dijawab oleh siapa pun.',
+  'Jangan menyebut atau mengasumsikan jumlah pemain tertentu di dalam pertanyaan.',
+  'Kartu tidak memiliki suara atau identitas sendiri: jangan gunakan sudut pandang orang pertama seperti gue, aku, saya, atau kami untuk merujuk pada si penanya.',
+  'Contoh salah: "Apa hal dari gue yang kalian nggak suka?" Contoh benar: "Apa kebiasaan orang lain di sini yang kurang kamu sukai?"',
+] as const;
+
+function buildPrompt({
+  category,
+  depth,
+  explorative = true,
+}: GeneratePackageInput): string {
   const explorativeInstruction = explorative
     ? 'Mode eksploratif aktif: topik dewasa, sensitif, atau kontroversial boleh muncul jika relevan.'
     : 'Mode eksploratif nonaktif: jaga pertanyaan tetap aman, umum, dan bebas dari topik dewasa, sensitif, atau kontroversial.';
@@ -159,8 +171,8 @@ function buildPrompt({ category, depth, explorative = true }: GeneratePackageInp
     'Buat tepat 10 pertanyaan kartu obrolan dalam Bahasa Indonesia yang santai dan natural.',
     `Kategori: ${category}.`,
     `Kedalaman: ${depth}.`,
-    'Pengguna adalah kelompok 3–8 teman usia 18–35 tahun yang sedang nongkrong.',
-    'Pertanyaan harus bervariasi, tidak berulang, dan enak dibacakan dengan suara keras.',
+    ...sharedAudienceInstructions,
+    'Pertanyaan harus bervariasi dan tidak berulang.',
     explorativeInstruction,
   ].join('\n');
 }
@@ -179,7 +191,8 @@ function buildReplacementPrompt({
     'Buat tepat satu pertanyaan pengganti dalam Bahasa Indonesia yang santai dan natural.',
     `Kategori: ${category}.`,
     `Kedalaman: ${depth}.`,
-    'Pertanyaan harus enak dibacakan dengan suara keras dan berbeda dari seluruh pertanyaan aktif berikut:',
+    ...sharedAudienceInstructions,
+    'Pertanyaan harus berbeda dari seluruh pertanyaan aktif berikut:',
     ...existingQuestions.map((question, index) => `${index + 1}. ${question}`),
     explorativeInstruction,
   ].join('\n');

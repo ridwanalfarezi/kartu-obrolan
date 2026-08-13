@@ -193,7 +193,7 @@ Palet memakai violet tinta sebagai meja visual, amber hangat sebagai ajakan bert
 - **Label** (700, 0.875rem, 1.2): tombol, chip, status, dan navigasi; selalu sentence case.
 - **Caption** (400–650, 0.75–0.8125rem, 1.45–1.5): metadata dan bantuan singkat yang tetap kontras.
 
-**The Read-Aloud Rule.** Pertanyaan diukur untuk nyaman dibacakan dari satu meja, bukan untuk memenuhi seluruh kartu.
+**The Shared-Table Rule.** Pertanyaan ditulis langsung untuk semua pemain dan mudah dipahami dari satu meja, bukan sebagai instruksi untuk seorang pembaca.
 
 **The One Voice Rule.** Jangan menambah keluarga font kedua; karakter dibentuk oleh bobot, skala, dan ritme.
 

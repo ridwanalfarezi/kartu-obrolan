@@ -5,7 +5,7 @@ Kartu Obrolan membantu kelompok teman memulai dan menjaga percakapan saat nongkr
 ## Participants and sessions
 
 **Hangout group**:
-A group of 3–8 friends using the app together during a casual gathering.
+Two or more friends using the app together during a casual gathering.
 _Avoid_: audience, customer segment
 
 **Conversation session**:
