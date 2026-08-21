@@ -12,6 +12,7 @@ Kartu Obrolan adalah aplikasi PWA mobile-first yang membuat pertanyaan percakapa
 - Disclosure untuk pertanyaan eksploratif yang mungkin membahas topik dewasa, sensitif, atau kontroversial.
 - PWA yang dapat dipasang dengan ikon maskable dan application shell offline.
 - Analytics anonim minimal: jumlah sesi, kategori, kedalaman, dan jumlah pertanyaan yang dilewati atau dibuat ulang. Disimpan di localStorage, tanpa data pribadi.
+- Memori variasi lokal maksimal 200 pertanyaan selama 30 hari, dengan deteksi parafrasa dan tombol reset.
 - Tidak menyimpan isi percakapan atau riwayat sesi di server.
 
 > Generasi atau pembuatan ulang pertanyaan tetap membutuhkan koneksi internet karena menggunakan Gemini API.
@@ -88,8 +89,9 @@ Endpoint serverless tersedia di:
 
 - Tidak ada akun atau login.
 - Tidak ada riwayat percakapan yang disimpan di server.
-- Isi pertanyaan yang sedang dimainkan hanya hidup di state aplikasi selama sesi aktif.
-- API menerima kategori, kedalaman, dan daftar pertanyaan aktif hanya ketika penggantian kartu diperlukan.
+- Maksimal 200 pertanyaan yang lolos validasi disimpan selama 30 hari hanya di perangkat untuk mencegah pengulangan lintas permainan.
+- Riwayat variasi dikirim sementara sebagai `avoidQuestions` saat membuat paket atau kartu pengganti, lalu tidak disimpan sebagai riwayat server.
+- Pengguna dapat menghapus memori tersebut melalui `Reset variasi pertanyaan` tanpa menghapus analytics.
 - API key Gemini hanya boleh tersedia di environment server.
 - Tidak ada fallback pertanyaan statis ketika AI tidak tersedia; kegagalan selalu ditampilkan dengan opsi pemulihan.
 
@@ -108,4 +110,4 @@ Detail domain tersedia di [`CONTEXT.md`](./CONTEXT.md), prinsip produk di [`PROD
 
 ## Status
 
-MVP selesai. Alur inti pembuatan dan penggunaan paket pertanyaan, pemulihan kegagalan AI, pengalaman PWA, dan analytics anonim minimal sudah tersedia dan terverifikasi.
+MVP selesai. Alur inti pembuatan dan penggunaan paket pertanyaan, memori variasi lokal, pemulihan kegagalan AI, pengalaman PWA, dan analytics anonim minimal sudah tersedia dan terverifikasi.

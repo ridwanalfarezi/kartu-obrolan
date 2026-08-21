@@ -37,6 +37,7 @@ The default language is natural, casual Indonesian. Explorative mode permits adu
 - Skip, regenerate, next-question, and retry actions.
 - Provider-neutral AI boundary.
 - Anonymous minimal analytics: session count, selected category, and skipped-question count.
+- Device-local question variation history: at most 200 accepted questions for 30 days, with a reset control.
 
 ### Out of scope for MVP
 
@@ -56,6 +57,7 @@ The default language is natural, casual Indonesian. Explorative mode permits adu
 - AI failures are visible and recoverable through `Coba lagi`.
 - The experience is usable on a mobile viewport and communicates its playful, warm tone.
 - No conversation content or session history is persisted on the server.
+- Recent accepted questions may be retained on the current device and sent temporarily with generation requests to prevent repeats; they are not retained by the server.
 - Analytics, if enabled, contains only the agreed anonymous minimal metrics.
 
 ## Open decisions

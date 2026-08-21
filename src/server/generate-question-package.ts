@@ -40,6 +40,8 @@ export function parseGeneratePackageInput(
     "explorative" in value && typeof value.explorative === "boolean"
       ? value.explorative
       : true;
+  const avoidQuestions =
+    "avoidQuestions" in value ? value.avoidQuestions : undefined;
 
   if (
     !isCategory(category) ||
@@ -54,14 +56,38 @@ export function parseGeneratePackageInput(
     );
   }
 
+  if (avoidQuestions !== undefined) {
+    if (
+      !Array.isArray(avoidQuestions) ||
+      avoidQuestions.length > 200 ||
+      !avoidQuestions.every(
+        (question) =>
+          typeof question === "string" &&
+          question.trim().length > 0 &&
+          question.length <= 1_000,
+      )
+    ) {
+      throw new InvalidGeneratePackageInput(
+        "Avoid questions must contain at most 200 non-empty strings.",
+      );
+    }
+
+    return {
+      category,
+      depth,
+      playerCount,
+      explorative,
+      avoidQuestions: avoidQuestions.map((question) => question.trim()),
+    };
+  }
+
   return { category, depth, playerCount, explorative };
 }
 
 export function parseGenerateReplacementInput(
   value: unknown,
 ): GenerateReplacementInput {
-  const { category, depth, playerCount, explorative } =
-    parseGeneratePackageInput(value);
+  const packageInput = parseGeneratePackageInput(value);
   const existingQuestions =
     typeof value === "object" && value !== null && "existingQuestions" in value
       ? value.existingQuestions
@@ -93,10 +119,7 @@ export function parseGenerateReplacementInput(
   }
 
   return {
-    category,
-    depth,
-    playerCount,
-    explorative,
+    ...packageInput,
     existingQuestions: normalizedQuestions,
   };
 }

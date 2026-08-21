@@ -52,10 +52,20 @@ _Avoid_: refresh, retry
 An action used when AI generation fails and the app needs to request the intended question package or replacement again.
 _Avoid_: regenerate
 
+## Question novelty
+
+**Question variation history**:
+Up to 200 accepted questions remembered on the user's device for 30 days so future conversation sessions can avoid exact repeats and close paraphrases. The history is sent only with a generation request and is never retained as server-side history.
+_Avoid_: saved session, conversation history, server memory
+
+**Reset question variation**:
+A user action that removes question variation history from the current device without changing analytics or the active conversation session.
+_Avoid_: reset session, clear analytics
+
 ## Analytics
 
 **Session analytics**:
-Anonymous, device-local counters recorded in localStorage. Tracks session count, selected category and depth, skip count, and regenerate count. No question text, personal identifiers, or free-form input is ever stored.
+Anonymous, device-local counters recorded in localStorage. Tracks session count, selected category and depth, skip count, and regenerate count. Analytics never stores question text, personal identifiers, or free-form input; question variation history is a separate device-local feature.
 _Avoid_: telemetry, tracking
 
 Analytics can be disabled without changing the core conversation flow.

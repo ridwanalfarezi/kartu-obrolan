@@ -4,12 +4,18 @@ import {
   createSessionAnalytics,
   type SessionAnalytics,
 } from './analytics.ts';
+import {
+  getQuestionHistory,
+  rememberAcceptedQuestions,
+  resetQuestionHistory,
+} from './question-history.ts';
 import type {
   Category,
   Depth,
   QuestionPackage,
 } from './question-generator.ts';
 import { maxPlayerCount, minPlayerCount } from './question-generator.ts';
+import { normalizeQuestion } from './question-novelty.ts';
 
 type View = 'home' | 'setup' | 'loading' | 'question' | 'complete' | 'error';
 
@@ -128,6 +134,7 @@ async function requestQuestionPackage(
   depth: Depth,
   explorative: boolean,
   playerCount: number,
+  avoidQuestions: string[],
   signal?: AbortSignal,
 ): Promise<QuestionPackage> {
   const controller = new AbortController();
@@ -143,7 +150,13 @@ async function requestQuestionPackage(
     response = await fetch('/api/questions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category, depth, explorative, playerCount }),
+      body: JSON.stringify({
+        category,
+        depth,
+        explorative,
+        playerCount,
+        ...(avoidQuestions.length > 0 ? { avoidQuestions } : {}),
+      }),
       signal: controller.signal,
     });
   } finally {
@@ -171,6 +184,7 @@ async function requestQuestionReplacement(
   explorative: boolean,
   playerCount: number,
   existingQuestions: string[],
+  avoidQuestions: string[],
 ): Promise<string> {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), 95_000);
@@ -186,6 +200,7 @@ async function requestQuestionReplacement(
         explorative,
         playerCount,
         existingQuestions,
+        ...(avoidQuestions.length > 0 ? { avoidQuestions } : {}),
       }),
       signal: controller.signal,
     });
@@ -256,6 +271,10 @@ export function App() {
   const [isConfirmingReset, setIsConfirmingReset] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [tipIndex, setTipIndex] = useState(0);
+  const [questionHistoryCount, setQuestionHistoryCount] = useState(
+    () => getQuestionHistory().length,
+  );
+  const [variationResetMessage, setVariationResetMessage] = useState('');
 
   const headingRef = useRef<HTMLHeadingElement>(null);
   const analyticsRef = useRef<SessionAnalytics | null>(null);
@@ -301,13 +320,18 @@ export function App() {
     abortControllerRef.current = controller;
 
     try {
+      const avoidQuestions = getQuestionHistory();
       const nextPackage = await requestQuestionPackage(
         category,
         depth,
         explorative,
         playerCount,
+        avoidQuestions,
         controller.signal,
       );
+      rememberAcceptedQuestions(nextPackage.questions);
+      setQuestionHistoryCount(getQuestionHistory().length);
+      setVariationResetMessage('');
       setQuestionPackage(nextPackage);
       setCurrentQuestionIndex(0);
       setSkipCount(0);
@@ -347,6 +371,18 @@ export function App() {
     setView('home');
   }
 
+  function resetQuestionVariation() {
+    if (resetQuestionHistory()) {
+      setQuestionHistoryCount(0);
+      setVariationResetMessage('Variasi pertanyaan sudah direset.');
+      return;
+    }
+
+    setVariationResetMessage(
+      'Riwayat belum berhasil direset. Coba lagi dari browser ini.',
+    );
+  }
+
   async function copyCurrentQuestion() {
     if (!questionPackage) return;
     const text = questionPackage.questions[currentQuestionIndex];
@@ -367,13 +403,22 @@ export function App() {
     setRegenerationFailed(false);
     setIsRegenerating(true);
     try {
+      const activeQuestions = new Set(
+        questionPackage.questions.map(normalizeQuestion),
+      );
+      const avoidQuestions = getQuestionHistory().filter(
+        question => !activeQuestions.has(normalizeQuestion(question)),
+      );
       const replacement = await requestQuestionReplacement(
         category,
         depth,
         explorative,
         activePlayerCount,
         questionPackage.questions,
+        avoidQuestions,
       );
+      rememberAcceptedQuestions([replacement]);
+      setQuestionHistoryCount(getQuestionHistory().length);
       setQuestionPackage(currentPackage => {
         if (!currentPackage) {
           return currentPackage;
@@ -621,12 +666,44 @@ export function App() {
               </label>
             </aside>
 
+            <section
+              aria-labelledby="variation-memory-title"
+              className="variation-memory"
+            >
+              <div className="variation-memory__copy">
+                <strong id="variation-memory-title">Variasi pertanyaan</strong>
+                <p>
+                  {questionHistoryCount > 0
+                    ? `${questionHistoryCount} pertanyaan terakhir tersimpan di perangkat selama 30 hari.`
+                    : 'Belum ada pertanyaan lama yang tersimpan di perangkat.'}{' '}
+                  Riwayat dikirim sementara saat membuat pertanyaan dan tidak
+                  disimpan di server.
+                </p>
+              </div>
+              <button
+                className="text-button variation-memory__reset"
+                disabled={questionHistoryCount === 0}
+                onClick={resetQuestionVariation}
+                type="button"
+              >
+                Reset variasi pertanyaan
+              </button>
+              {variationResetMessage && (
+                <p className="variation-memory__status" role="status">
+                  {variationResetMessage}
+                </p>
+              )}
+            </section>
+
             <div className="session-form__action">
               <button className="button button--amber button--full" type="submit">
                 Buat pertanyaan
                 <span aria-hidden="true">→</span>
               </button>
-              <p>10 pertanyaan khusus untuk kelompokmu. 100% privat tanpa simpan riwayat.</p>
+              <p>
+                10 pertanyaan khusus untuk kelompokmu. Riwayat variasi tetap di
+                perangkat dan tidak disimpan di server.
+              </p>
             </div>
           </form>
         </main>

@@ -3,6 +3,11 @@ import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
 import { App } from '../src/App.tsx';
+import {
+  getQuestionHistory,
+  rememberAcceptedQuestions,
+  resetQuestionHistory,
+} from '../src/question-history.ts';
 
 const questions = Array.from(
   { length: 10 },
@@ -12,6 +17,7 @@ const questions = Array.from(
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  localStorage.clear();
 });
 
 async function choosePlayerCount(
@@ -116,6 +122,26 @@ describe('conversation session start flow', () => {
     expect(screen.getByText(/selalu boleh melewati/i)).toBeInTheDocument();
   });
 
+  test('resets device question variation without leaving setup', async () => {
+    rememberAcceptedQuestions(['Pertanyaan lama yang pernah diterima?']);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await user.click(
+      screen.getByRole('button', { name: /reset variasi pertanyaan/i }),
+    );
+
+    expect(getQuestionHistory()).toEqual([]);
+    expect(screen.getByRole('status')).toHaveTextContent(
+      /variasi pertanyaan sudah direset/i,
+    );
+    expect(
+      screen.getByRole('heading', { name: /mau ngobrol tentang apa/i }),
+    ).toBeInTheDocument();
+    resetQuestionHistory();
+  });
+
   test('allows toggling explorative mode off', async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -194,6 +220,39 @@ describe('conversation session start flow', () => {
     });
   });
 
+  test('sends device history and remembers only the accepted package', async () => {
+    const avoidedQuestion = 'Apa keputusan terbesar yang pernah kamu sesali?';
+    rememberAcceptedQuestions([avoidedQuestion]);
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ questions }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
+    await user.click(
+      screen.getByRole('button', { name: /buat pertanyaan/i }),
+    );
+
+    expect(await screen.findByText(questions[0])).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/questions',
+      expect.objectContaining({
+        body: JSON.stringify({
+          category: 'mixed',
+          depth: 'personal',
+          explorative: true,
+          playerCount: 4,
+          avoidQuestions: [avoidedQuestion],
+        }),
+      }),
+    );
+    expect(getQuestionHistory()).toEqual([avoidedQuestion, ...questions]);
+  });
+
   test('does not admit a malformed package into the session', async () => {
     vi.stubGlobal(
       'fetch',
@@ -219,6 +278,7 @@ describe('conversation session start flow', () => {
     expect(
       screen.getByRole('button', { name: /coba lagi/i }),
     ).toBeInTheDocument();
+    expect(getQuestionHistory()).toEqual([]);
   });
 
   test('retries a failed initial generation with the same session choices', async () => {
@@ -436,6 +496,50 @@ describe('conversation session start flow', () => {
         }),
       }),
     );
+  });
+
+  test('replacement avoids older device history and remembers the accepted result', async () => {
+    const avoidedQuestion = 'Apa keputusan terbesar yang pernah kamu sesali?';
+    const replacement = 'Nilai hidup apa yang baru kamu pahami tahun ini?';
+    rememberAcceptedQuestions([avoidedQuestion]);
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ questions }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ question: replacement }),
+      });
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
+    await user.click(
+      screen.getByRole('button', { name: /buat pertanyaan/i }),
+    );
+    expect(await screen.findByText(questions[0])).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /buat ulang/i }));
+
+    expect(await screen.findByText(replacement)).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      '/api/question-replacement',
+      expect.objectContaining({
+        body: JSON.stringify({
+          category: 'mixed',
+          depth: 'personal',
+          explorative: true,
+          playerCount: 4,
+          existingQuestions: questions,
+          avoidQuestions: [avoidedQuestion],
+        }),
+      }),
+    );
+    expect(getQuestionHistory()).toContain(replacement);
   });
 
   test('keeps the active package and retries a failed regeneration', async () => {

@@ -47,6 +47,23 @@ function modelReturningWithPromptCapture(
   });
 }
 
+function modelReturningSequence(values: unknown[], onCall?: () => void) {
+  let index = 0;
+  return new MockLanguageModelV4({
+    doGenerate: async () => {
+      onCall?.();
+      const value = values[Math.min(index, values.length - 1)];
+      index += 1;
+      return {
+        content: [{ type: 'text' as const, text: JSON.stringify(value) }],
+        finishReason: { unified: 'stop' as const, raw: undefined },
+        usage: tokenUsage,
+        warnings: [],
+      };
+    },
+  });
+}
+
 test('two-player package instructions require exactly two player-neutral participants', async () => {
   const questions = Array.from(
     { length: 10 },
@@ -71,6 +88,132 @@ test('two-player package instructions require exactly two player-neutral partici
   assert.match(capturedPrompt, /bacakan.*tanyakan.*pilih tiga orang.*tunjuk teman/i);
   assert.match(capturedPrompt, /pembaca.*host.*fasilitator/i);
   assert.match(capturedPrompt, /gue.*aku.*saya.*kami/i);
+});
+
+test('package prompt explicitly avoids device question history', async () => {
+  const questions = Array.from(
+    { length: 10 },
+    (_, index) => `Pertanyaan segar nomor ${index + 1}?`,
+  );
+  const avoidedQuestion = 'Apa keputusan terbesar yang pernah kamu sesali?';
+  let capturedPrompt = '';
+  const generator = createQuestionGenerator({
+    model: modelReturningWithPromptCapture({ questions }, prompt => {
+      capturedPrompt = prompt;
+    }),
+  });
+
+  await generator.generatePackage({
+    category: 'reflective',
+    depth: 'deep',
+    playerCount: 4,
+    avoidQuestions: [avoidedQuestion],
+  });
+
+  assert.match(capturedPrompt, /hindari.*pertanyaan lama/i);
+  assert.match(capturedPrompt, new RegExp(avoidedQuestion.replace('?', '\\?'), 'i'));
+});
+
+test('package regenerates only a candidate paraphrasing device history', async () => {
+  const avoidedQuestion = 'Apa keputusan terbesar yang pernah kamu sesali?';
+  const questions = [
+    'Keputusan apa dalam hidup yang paling membuatmu menyesal?',
+    ...Array.from(
+      { length: 9 },
+      (_, index) => `Topik segar khusus nomor ${index + 2}?`,
+    ),
+  ];
+  const replacement = 'Nilai hidup apa yang baru kamu pahami tahun ini?';
+  let callCount = 0;
+  const generator = createQuestionGenerator({
+    model: modelReturningSequence(
+      [{ questions }, { question: replacement }],
+      () => {
+        callCount += 1;
+      },
+    ),
+  });
+
+  const result = await generator.generatePackage({
+    category: 'reflective',
+    depth: 'deep',
+    playerCount: 4,
+    avoidQuestions: [avoidedQuestion],
+  });
+
+  assert.deepEqual(result.questions, [replacement, ...questions.slice(1)]);
+  assert.equal(callCount, 2);
+});
+
+test('package stops after three rejected replacement attempts', async () => {
+  const avoidedQuestion = 'Apa keputusan terbesar yang pernah kamu sesali?';
+  const paraphrase =
+    'Keputusan apa dalam hidup yang paling membuatmu menyesal?';
+  const questions = [
+    paraphrase,
+    ...Array.from(
+      { length: 9 },
+      (_, index) => `Topik segar khusus nomor ${index + 2}?`,
+    ),
+  ];
+  let callCount = 0;
+  const generator = createQuestionGenerator({
+    model: modelReturningSequence(
+      [
+        { questions },
+        { question: paraphrase },
+        { question: paraphrase },
+        { question: paraphrase },
+      ],
+      () => {
+        callCount += 1;
+      },
+    ),
+  });
+
+  await assert.rejects(
+    generator.generatePackage({
+      category: 'reflective',
+      depth: 'deep',
+      playerCount: 4,
+      avoidQuestions: [avoidedQuestion],
+    }),
+  );
+  assert.equal(callCount, 4);
+});
+
+test('package regenerates only a normalized exact duplicate candidate', async () => {
+  const questions = [
+    'Hal kecil apa yang membuatmu tersenyum hari ini?',
+    'Cerita masa sekolah apa yang paling sering kamu ulang?',
+    'Kebiasaan baru apa yang ingin kamu mulai?',
+    'Makanan apa yang mengingatkanmu pada rumah?',
+    'Siapa yang paling pandai mencairkan suasana di sini?',
+    'Pendapat apa yang berubah setelah kamu dewasa?',
+    'Tempat mana yang ingin kamu kunjungi bersama teman?',
+    'Lagu apa yang langsung mengubah suasana hatimu?',
+    'Hal spontan apa yang terakhir kamu lakukan?',
+    'Hal kecil apa yang membuatmu tersenyum hari ini?',
+  ];
+  const replacement = 'Kejutan menyenangkan apa yang paling kamu ingat?';
+  let callCount = 0;
+  const generator = createQuestionGenerator({
+    model: modelReturningSequence(
+      [{ questions }, { question: replacement }],
+      () => {
+        callCount += 1;
+      },
+    ),
+  });
+
+  const result = await generator.generatePackage({
+    category: 'mixed',
+    depth: 'personal',
+    playerCount: 4,
+  });
+
+  assert.equal(result.questions[9], replacement);
+  assert.equal(callCount, 2);
 });
 
 test('two-player package rejects a question that requires three people', async () => {

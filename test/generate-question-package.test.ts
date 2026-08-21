@@ -18,6 +18,29 @@ test('valid session settings include an exact supported player count', () => {
   );
 });
 
+test('package boundary accepts device history as avoidQuestions', () => {
+  const avoidQuestions = [
+    'Apa keputusan terbesar yang pernah kamu sesali?',
+    'Momen apa yang paling ingin kamu ulang?',
+  ];
+
+  assert.deepEqual(
+    parseGeneratePackageInput({
+      category: 'reflective',
+      depth: 'deep',
+      playerCount: 4,
+      avoidQuestions,
+    }),
+    {
+      category: 'reflective',
+      depth: 'deep',
+      playerCount: 4,
+      explorative: true,
+      avoidQuestions,
+    },
+  );
+});
+
 test('missing or unsupported player counts are rejected by the server boundary', () => {
   for (const playerCount of [undefined, 1, 2.5, 13, '4']) {
     assert.throws(

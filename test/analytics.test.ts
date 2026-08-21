@@ -123,7 +123,7 @@ test('session completion records final stats', () => {
 
 // --- Privacy boundary ---
 
-test('no question text is ever stored in localStorage', () => {
+test('analytics never stores question text in localStorage', () => {
   const analytics = createSessionAnalytics('mixed', 'deep');
   analytics.recordSkip();
   analytics.recordRegenerate();
@@ -134,7 +134,7 @@ test('no question text is ever stored in localStorage', () => {
     const value = localStorage.getItem(key)!;
     assert.ok(
       !value.includes('Pertanyaan'),
-      `localStorage key "${key}" must not contain question text`,
+      `analytics localStorage key "${key}" must not contain question text`,
     );
   }
 });
