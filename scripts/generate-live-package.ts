@@ -10,6 +10,7 @@ try {
   const questionPackage = await generator.generatePackage({
     category: 'mixed',
     depth: 'personal',
+    playerCount: 4,
   });
 
   console.log(

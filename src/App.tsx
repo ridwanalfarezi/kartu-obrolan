@@ -9,6 +9,7 @@ import type {
   Depth,
   QuestionPackage,
 } from './question-generator.ts';
+import { maxPlayerCount, minPlayerCount } from './question-generator.ts';
 
 type View = 'home' | 'setup' | 'loading' | 'question' | 'complete' | 'error';
 
@@ -126,6 +127,7 @@ async function requestQuestionPackage(
   category: Category,
   depth: Depth,
   explorative: boolean,
+  playerCount: number,
   signal?: AbortSignal,
 ): Promise<QuestionPackage> {
   const controller = new AbortController();
@@ -141,7 +143,7 @@ async function requestQuestionPackage(
     response = await fetch('/api/questions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category, depth, explorative }),
+      body: JSON.stringify({ category, depth, explorative, playerCount }),
       signal: controller.signal,
     });
   } finally {
@@ -167,6 +169,7 @@ async function requestQuestionReplacement(
   category: Category,
   depth: Depth,
   explorative: boolean,
+  playerCount: number,
   existingQuestions: string[],
 ): Promise<string> {
   const controller = new AbortController();
@@ -177,7 +180,13 @@ async function requestQuestionReplacement(
     response = await fetch('/api/question-replacement', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category, depth, explorative, existingQuestions }),
+      body: JSON.stringify({
+        category,
+        depth,
+        explorative,
+        playerCount,
+        existingQuestions,
+      }),
       signal: controller.signal,
     });
   } finally {
@@ -234,6 +243,9 @@ export function App() {
   const [category, setCategory] = useState<Category>('mixed');
   const [depth, setDepth] = useState<Depth>('personal');
   const [explorative, setExplorative] = useState(true);
+  const [playerCountInput, setPlayerCountInput] = useState('');
+  const [playerCountError, setPlayerCountError] = useState<string | null>(null);
+  const [activePlayerCount, setActivePlayerCount] = useState<number | null>(null);
   const [questionPackage, setQuestionPackage] =
     useState<QuestionPackage | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -264,6 +276,26 @@ export function App() {
   }, [view]);
 
   async function startSession() {
+    const playerCount = Number(playerCountInput);
+    if (playerCountInput.trim() === '') {
+      setPlayerCountError('Masukkan jumlah pemain sebelum membuat pertanyaan.');
+      setView('setup');
+      return;
+    }
+    if (
+      !Number.isInteger(playerCount) ||
+      playerCount < minPlayerCount ||
+      playerCount > maxPlayerCount
+    ) {
+      setPlayerCountError(
+        `Pilih jumlah antara ${minPlayerCount} sampai ${maxPlayerCount} pemain.`,
+      );
+      setView('setup');
+      return;
+    }
+
+    setPlayerCountError(null);
+    setActivePlayerCount(playerCount);
     setView('loading');
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -273,6 +305,7 @@ export function App() {
         category,
         depth,
         explorative,
+        playerCount,
         controller.signal,
       );
       setQuestionPackage(nextPackage);
@@ -307,6 +340,9 @@ export function App() {
     setIsRegenerating(false);
     setRegenerationFailed(false);
     setIsConfirmingReset(false);
+    setPlayerCountInput('');
+    setPlayerCountError(null);
+    setActivePlayerCount(null);
     analyticsRef.current = null;
     setView('home');
   }
@@ -324,7 +360,7 @@ export function App() {
   }
 
   async function regenerateCurrentQuestion() {
-    if (!questionPackage) {
+    if (!questionPackage || activePlayerCount === null) {
       return;
     }
 
@@ -335,6 +371,7 @@ export function App() {
         category,
         depth,
         explorative,
+        activePlayerCount,
         questionPackage.questions,
       );
       setQuestionPackage(currentPackage => {
@@ -480,11 +517,46 @@ export function App() {
 
           <form
             className="session-form"
+            noValidate
             onSubmit={event => {
               event.preventDefault();
               void startSession();
             }}
           >
+            <section className="player-count-field" aria-labelledby="player-count-label">
+              <div className="player-count-field__copy">
+                <label id="player-count-label" htmlFor="player-count">
+                  Berapa orang yang main?
+                </label>
+                <p id="player-count-help">Masukkan 2–12 pemain.</p>
+              </div>
+              <input
+                aria-describedby={
+                  playerCountError
+                    ? 'player-count-help player-count-error'
+                    : 'player-count-help'
+                }
+                aria-invalid={playerCountError ? 'true' : 'false'}
+                id="player-count"
+                inputMode="numeric"
+                max={maxPlayerCount}
+                min={minPlayerCount}
+                onChange={event => {
+                  setPlayerCountInput(event.target.value);
+                  if (playerCountError) setPlayerCountError(null);
+                }}
+                placeholder="4"
+                step="1"
+                type="number"
+                value={playerCountInput}
+              />
+              {playerCountError && (
+                <p className="player-count-field__error" id="player-count-error" role="alert">
+                  {playerCountError}
+                </p>
+              )}
+            </section>
+
             <fieldset className="choice-group choice-group--category">
               <legend>Pilih kategori</legend>
               <div className="category-options">
@@ -618,7 +690,8 @@ export function App() {
                 </span>
                 <span className="meta-dot">•</span>
                 <span className="meta-tags">
-                  {selectedCategory?.label} · {selectedDepth?.label}
+                  {activePlayerCount} pemain · {selectedCategory?.label} ·{' '}
+                  {selectedDepth?.label}
                 </span>
               </div>
 
@@ -775,7 +848,7 @@ export function App() {
               >
                 Akhiri sesi
               </button>
-              <span className="footer-status">Giliranmu membaca kartu ini!</span>
+              <span className="footer-status">Semua pemain boleh menjawab.</span>
             </div>
           </footer>
 
@@ -848,7 +921,8 @@ export function App() {
               Gagal menyiapkan pertanyaan.
             </h1>
             <p>
-              Koneksi atau AI sedang sibuk. Pilihan topikmu tetap tersimpan aman.
+              Koneksi atau AI sedang sibuk. Jumlah pemain dan pilihan topikmu
+              tetap tersimpan aman.
             </p>
           </div>
           <div className="error-screen__actions">
@@ -873,4 +947,3 @@ export function App() {
     </div>
   );
 }
-

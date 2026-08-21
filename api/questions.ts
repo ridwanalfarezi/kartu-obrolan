@@ -28,7 +28,9 @@ export default async function handler(
     if (error instanceof InvalidGeneratePackageInput) {
       response
         .status(400)
-        .json({ error: 'Kategori atau kedalaman belum valid.' } satisfies ErrorResponse);
+        .json({
+          error: 'Jumlah pemain, kategori, atau kedalaman belum valid.',
+        } satisfies ErrorResponse);
       return;
     }
 

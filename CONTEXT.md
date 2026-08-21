@@ -12,8 +12,12 @@ _Avoid_: audience, customer segment
 A temporary activity in which one hangout group receives and discusses a package of generated questions.
 _Avoid_: account, room, meeting
 
+**Player count**:
+The exact number of people in the hangout group for the current conversation session, selected before generation and kept for the session. Supported values are 2–12.
+_Avoid_: audience size, room capacity
+
 **Question package**:
-A set of 10 questions generated for one conversation session from the selected category and depth.
+A set of 10 questions generated for one conversation session from the selected player count, category, and depth.
 _Avoid_: deck, playlist, batch
 
 **Question card**:

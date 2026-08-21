@@ -14,6 +14,17 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+async function choosePlayerCount(
+  user: ReturnType<typeof userEvent.setup>,
+  value = '4',
+) {
+  const input = screen.getByRole('spinbutton', {
+    name: /berapa orang yang main/i,
+  });
+  await user.clear(input);
+  await user.type(input, value);
+}
+
 describe('conversation session start flow', () => {
   test('starts without an account and opens session setup', async () => {
     const user = userEvent.setup();
@@ -27,6 +38,70 @@ describe('conversation session start flow', () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText(/^Campur/)).toBeChecked();
     expect(screen.getByLabelText(/^Personal/)).toBeChecked();
+  });
+
+  test('requires a supported player count before generating questions', async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    const playerCount = screen.getByRole('spinbutton', {
+      name: /berapa orang yang main/i,
+    });
+    expect(playerCount).toHaveValue(null);
+
+    await user.click(
+      screen.getByRole('button', { name: /buat pertanyaan/i }),
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent(/masukkan jumlah pemain/i);
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    await user.type(playerCount, '13');
+    await user.click(
+      screen.getByRole('button', { name: /buat pertanyaan/i }),
+    );
+    expect(screen.getByRole('alert')).toHaveTextContent(/2 sampai 12 pemain/i);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  test('keeps the exact player count in the active session request and metadata', async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({ questions }),
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await user.type(
+      screen.getByRole('spinbutton', { name: /berapa orang yang main/i }),
+      '2',
+    );
+    await user.click(
+      screen.getByRole('button', { name: /buat pertanyaan/i }),
+    );
+
+    expect(await screen.findByText(questions[0])).toBeInTheDocument();
+    expect(screen.getByText(/2 pemain/i)).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/questions',
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({
+          category: 'mixed',
+          depth: 'personal',
+          explorative: true,
+          playerCount: 2,
+        }),
+      }),
+    );
+    expect(screen.getByRole('button', { name: /^lewati$/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /buat ulang/i })).toBeInTheDocument();
+    expect(screen.getByText(/semua pemain boleh menjawab/i)).toBeInTheDocument();
+    expect(screen.queryByText(/giliranmu|membaca kartu/i)).not.toBeInTheDocument();
   });
 
   test('sets clear expectations for explorative mode before generation', async () => {
@@ -51,6 +126,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
     const checkbox = screen.getByRole('checkbox');
     expect(checkbox).toBeChecked();
     await user.click(checkbox);
@@ -65,7 +141,12 @@ describe('conversation session start flow', () => {
         '/api/questions',
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ category: 'mixed', depth: 'personal', explorative: false }),
+          body: JSON.stringify({
+            category: 'mixed',
+            depth: 'personal',
+            explorative: false,
+            playerCount: 4,
+          }),
         }),
       );
     });
@@ -84,6 +165,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
     await user.click(screen.getByLabelText(/^Lucu/));
     await user.click(screen.getByLabelText(/^Mendalam/));
     await user.click(
@@ -101,7 +183,12 @@ describe('conversation session start flow', () => {
         '/api/questions',
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ category: 'funny', depth: 'deep', explorative: true }),
+          body: JSON.stringify({
+            category: 'funny',
+            depth: 'deep',
+            explorative: true,
+            playerCount: 4,
+          }),
         }),
       );
     });
@@ -119,6 +206,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
     await user.click(
       screen.getByRole('button', { name: /buat pertanyaan/i }),
     );
@@ -149,6 +237,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
     await user.click(screen.getByLabelText(/^Lucu/));
     await user.click(screen.getByLabelText(/^Mendalam/));
     await user.click(
@@ -174,7 +263,12 @@ describe('conversation session start flow', () => {
       '/api/questions',
       expect.objectContaining({
         method: 'POST',
-        body: JSON.stringify({ category: 'funny', depth: 'deep', explorative: true }),
+        body: JSON.stringify({
+          category: 'funny',
+          depth: 'deep',
+          explorative: true,
+          playerCount: 4,
+        }),
       }),
     );
   });
@@ -191,6 +285,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
     await user.click(
       screen.getByRole('button', { name: /buat pertanyaan/i }),
     );
@@ -216,6 +311,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
     await user.click(
       screen.getByRole('button', { name: /buat pertanyaan/i }),
     );
@@ -239,6 +335,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
     await user.click(
       screen.getByRole('button', { name: /buat pertanyaan/i }),
     );
@@ -274,6 +371,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
     await user.click(
       screen.getByRole('button', { name: /buat pertanyaan/i }),
     );
@@ -311,6 +409,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
     await user.click(
       screen.getByRole('button', { name: /buat pertanyaan/i }),
     );
@@ -332,6 +431,7 @@ describe('conversation session start flow', () => {
           category: 'mixed',
           depth: 'personal',
           explorative: true,
+          playerCount: 4,
           existingQuestions: questions,
         }),
       }),
@@ -359,6 +459,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
     await user.click(
       screen.getByRole('button', { name: /buat pertanyaan/i }),
     );
@@ -388,6 +489,7 @@ describe('conversation session start flow', () => {
           category: 'mixed',
           depth: 'personal',
           explorative: true,
+          playerCount: 4,
           existingQuestions: questions,
         }),
       }),
@@ -410,6 +512,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
     await user.click(
       screen.getByRole('button', { name: /buat pertanyaan/i }),
     );
@@ -438,6 +541,7 @@ describe('conversation session start flow', () => {
     render(<App />);
 
     await user.click(screen.getByRole('button', { name: /mulai sesi/i }));
+    await choosePlayerCount(user);
     await user.click(
       screen.getByRole('button', { name: /buat pertanyaan/i }),
     );
@@ -464,4 +568,3 @@ describe('conversation session start flow', () => {
     expect(screen.getByText(/semua obrolan tetap milik kelompokmu/i)).toBeInTheDocument();
   });
 });
-

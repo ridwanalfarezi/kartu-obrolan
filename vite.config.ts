@@ -72,14 +72,20 @@ function localQuestionApi(): Plugin {
             error instanceof SyntaxError
           ) {
             sendJson(response, 400, {
-              error: "Kategori atau kedalaman belum valid.",
+              error:
+                pathname === "/api/question-replacement"
+                  ? "Jumlah pemain atau konteks pertanyaan belum valid."
+                  : "Jumlah pemain, kategori, atau kedalaman belum valid.",
             });
             return;
           }
 
           console.error("Local question package generation failed.", error);
           sendJson(response, 502, {
-            error: "Pertanyaan belum berhasil dibuat. Silakan coba lagi.",
+            error:
+              pathname === "/api/question-replacement"
+                ? "Pertanyaan belum berhasil dibuat ulang. Silakan coba lagi."
+                : "Pertanyaan belum berhasil dibuat. Silakan coba lagi.",
           });
         }
       });

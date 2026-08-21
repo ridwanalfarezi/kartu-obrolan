@@ -27,7 +27,7 @@ export default async function handler(
   } catch (error) {
     if (error instanceof InvalidGeneratePackageInput) {
       response.status(400).json({
-        error: 'Konteks pertanyaan belum valid.',
+        error: 'Jumlah pemain atau konteks pertanyaan belum valid.',
       } satisfies ErrorResponse);
       return;
     }

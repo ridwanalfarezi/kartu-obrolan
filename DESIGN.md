@@ -233,6 +233,7 @@ Komponen terasa taktil dan percaya diri: bentuknya sederhana, targetnya besar, d
 ### Inputs / Fields
 
 - **Style:** radio native disembunyikan secara visual tetapi tetap menjadi kontrol semantik; seluruh label 44 px menjadi target sentuh.
+- **Player count:** input angka wajib 2–12 tampil sebelum kategori, memakai tinggi 3.5rem, keyboard numerik, bantuan singkat, serta error inline yang tidak bergantung pada validasi bawaan browser.
 - **Focus:** ring amber 3 px dan offset 2 px pada label pembungkus.
 - **Selected:** border Violet Meja; radio kedalaman menampilkan titik isi selain perubahan warna.
 
@@ -243,7 +244,7 @@ Komponen terasa taktil dan percaya diri: bentuknya sederhana, targetnya besar, d
 
 ### Recovery States
 
-- **Initial generation:** tampil sebagai layar error tersendiri dengan `Coba lagi` sebagai CTA amber dan `Ubah pengaturan` sebagai tindakan sekunder. Pilihan kategori dan kedalaman tetap tersimpan di perangkat.
+- **Initial generation:** tampil sebagai layar error tersendiri dengan `Coba lagi` sebagai CTA amber dan `Ubah pengaturan` sebagai tindakan sekunder. Jumlah pemain, kategori, dan kedalaman tetap tersedia untuk percobaan ulang selama sesi berjalan.
 - **Regeneration:** tampil inline di bawah kartu agar pertanyaan, posisi, dan paket aktif tidak hilang. Pesan menjelaskan bahwa kartu saat ini tetap aman dan menyediakan `Coba lagi`.
 - **No silent fallback:** kegagalan transport dan respons AI invalid memakai recovery yang sama; keduanya tidak pernah diganti pertanyaan statis.
 

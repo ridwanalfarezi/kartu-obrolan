@@ -6,7 +6,7 @@ Help a group of friends start and sustain a casual conversation by presenting AI
 
 ## Users and context
 
-- Primary users: groups of two or more adult friends.
+- Primary users: groups of 2–12 adult friends.
 - Context: spontaneous, casual hangouts.
 - Device pattern: one phone is passed around or viewed by the group.
 
@@ -14,7 +14,7 @@ Help a group of friends start and sustain a casual conversation by presenting AI
 
 1. The user opens the mobile-first web app.
 2. The user taps `Mulai sesi`.
-3. The user selects one category and one depth.
+3. The user enters an exact supported player count, then selects one category and one depth.
 4. The AI generates a package of 10 questions.
 5. The app shows one question card at a time.
 6. The group can use `Lewati`, `Buat ulang`, or `Pertanyaan berikutnya`.
@@ -50,7 +50,7 @@ The default language is natural, casual Indonesian. Explorative mode permits adu
 ## Acceptance criteria
 
 - A group can start a session without registering or logging in.
-- A session can be configured with category and depth.
+- A session can be configured with an exact 2–12 player count, category, and depth.
 - A successful generation produces 10 questions and displays them individually.
 - The active question can be skipped or replaced.
 - AI failures are visible and recoverable through `Coba lagi`.

@@ -4,6 +4,8 @@ import {
   categories,
   createQuestionGenerator,
   depths,
+  maxPlayerCount,
+  minPlayerCount,
   type Category,
   type Depth,
   type GeneratePackageInput,
@@ -33,24 +35,33 @@ export function parseGeneratePackageInput(
 
   const category = "category" in value ? value.category : undefined;
   const depth = "depth" in value ? value.depth : undefined;
+  const playerCount = "playerCount" in value ? value.playerCount : undefined;
   const explorative =
     "explorative" in value && typeof value.explorative === "boolean"
       ? value.explorative
       : true;
 
-  if (!isCategory(category) || !isDepth(depth)) {
+  if (
+    !isCategory(category) ||
+    !isDepth(depth) ||
+    typeof playerCount !== "number" ||
+    !Number.isInteger(playerCount) ||
+    playerCount < minPlayerCount ||
+    playerCount > maxPlayerCount
+  ) {
     throw new InvalidGeneratePackageInput(
-      "Category and depth must use supported values.",
+      "Category, depth, and player count must use supported values.",
     );
   }
 
-  return { category, depth, explorative };
+  return { category, depth, playerCount, explorative };
 }
 
 export function parseGenerateReplacementInput(
   value: unknown,
 ): GenerateReplacementInput {
-  const { category, depth, explorative } = parseGeneratePackageInput(value);
+  const { category, depth, playerCount, explorative } =
+    parseGeneratePackageInput(value);
   const existingQuestions =
     typeof value === "object" && value !== null && "existingQuestions" in value
       ? value.existingQuestions
@@ -81,7 +92,13 @@ export function parseGenerateReplacementInput(
     );
   }
 
-  return { category, depth, explorative, existingQuestions: normalizedQuestions };
+  return {
+    category,
+    depth,
+    playerCount,
+    explorative,
+    existingQuestions: normalizedQuestions,
+  };
 }
 
 export async function generateQuestionPackage(

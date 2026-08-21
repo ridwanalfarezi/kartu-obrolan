@@ -10,11 +10,11 @@ web
 
 ## Users
 
-Kartu Obrolan digunakan oleh dua orang atau lebih pemain dewasa saat hangout spontan. Satu ponsel dilihat bersama atau berpindah tangan. Mereka ingin memulai dan menjaga percakapan tanpa menyiapkan permainan, membuat akun, atau memasukkan topik sendiri.
+Kartu Obrolan digunakan oleh 2–12 pemain dewasa saat hangout spontan. Satu ponsel dilihat bersama atau berpindah tangan. Mereka ingin memulai dan menjaga percakapan tanpa menyiapkan permainan, membuat akun, atau memasukkan topik sendiri.
 
 ## Product Purpose
 
-Kartu Obrolan menghasilkan paket berisi 10 pertanyaan percakapan dalam Bahasa Indonesia yang natural berdasarkan kategori dan kedalaman pilihan kelompok. Produk berhasil ketika kelompok dapat masuk dari layar awal ke pertanyaan pertama dengan cepat, memahami setiap tindakan tanpa penjelasan, dan mempertahankan alur percakapan tanpa terdistraksi oleh antarmuka.
+Kartu Obrolan menghasilkan paket berisi 10 pertanyaan percakapan dalam Bahasa Indonesia yang natural berdasarkan jumlah pemain, kategori, dan kedalaman pilihan kelompok. Produk berhasil ketika kelompok dapat masuk dari layar awal ke pertanyaan pertama dengan cepat, memahami setiap tindakan tanpa penjelasan, dan mempertahankan alur percakapan tanpa terdistraksi oleh antarmuka.
 
 ## Positioning
 
