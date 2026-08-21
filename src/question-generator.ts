@@ -8,7 +8,7 @@ import {
 import {
   isQuestionTooSimilar,
   normalizeQuestion,
-} from './question-novelty.ts';
+} from './question-novelty.js';
 
 export const categories = [
   'light',
